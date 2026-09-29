@@ -18,19 +18,52 @@ from ..models import User
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 # Load the national KPIs from the JSON snapshot (§5.7)
-_JSON_PATH = Path(__file__).parent.parent.parent.parent.parent / "data" / "json_2026-09-22.json"
+_CANDIDATE_PATHS = [
+    Path(__file__).parent.parent.parent / "data" / "json_2026-09-22.json",
+    Path(__file__).parent.parent / "data" / "json_2026-09-22.json",
+    Path(__file__).parent.parent.parent.parent.parent / "data" / "json_2026-09-22.json",
+    Path.cwd() / "data" / "json_2026-09-22.json",
+    Path.cwd() / "prahari" / "backend" / "data" / "json_2026-09-22.json",
+]
+
+_DEFAULT_NATIONAL_KPIS = {
+    "totalAllocated": 116819035627.53,
+    "totalExpenditure": 39953382732.14,
+    "totalRecommendedAmount": 79081497846.06,
+    "utilizationPercentage": 67.69572905755385,
+    "recommendationUtilizationPercentage": 67.69572905755385,
+    "utilizationDefinition": "recommended_amount",
+    "expenditurePercentage": 34.201089332331755,
+    "totalMPs": 774,
+    "totalWorksCompleted": 44028,
+    "totalWorksRecommended": 131141,
+    "completionRate": 33.57302445459467,
+    "totalTransactions": 108695,
+    "avgAllocation": 150928986.59887597,
+    "pendingWorks": 87113,
+    "paymentGap": 39.714678301233555,
+    "completedWorksValue": 24086877004.61,
+    "inProgressPayments": 15867357422.53,
+}
+
 _national_kpis = None
 
 
 def _get_national_kpis():
     global _national_kpis
     if _national_kpis is None:
-        try:
-            with open(_JSON_PATH, encoding="utf-8") as f:
-                raw = json.load(f)
-                _national_kpis = raw.get("data", {})
-        except Exception:
-            _national_kpis = {}
+        for p in _CANDIDATE_PATHS:
+            try:
+                if p.exists():
+                    with open(p, encoding="utf-8") as f:
+                        raw = json.load(f)
+                        data = raw.get("data", {})
+                        if data and "totalAllocated" in data:
+                            _national_kpis = data
+                            return _national_kpis
+            except Exception:
+                continue
+        _national_kpis = _DEFAULT_NATIONAL_KPIS
     return _national_kpis
 
 

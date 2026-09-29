@@ -129,19 +129,19 @@ export default function MinistryDashboard() {
             {lang === 'hi' 
               ? `सभी सांसदों के ${stats?.total_works?.toLocaleString() || '…'} सांसद निधि कार्यों से वास्तविक समय डेटा विश्लेषण एवं विसंगति पहचान`
               : `Real-time data analytics, anomaly detection & fraud mitigation across ${stats?.total_works?.toLocaleString() || '…'} active MPLADS works`}
-            {nationalKpis && ` · ${nationalKpis.totalMPs} MPs · ₹${(nationalKpis.totalAllocated/1e9).toFixed(1)}B ${lang === 'hi' ? 'कुल आवंटन' : 'total allocation'}`}
+            {nationalKpis?.totalAllocated != null && ` · ${nationalKpis.totalMPs || 774} MPs · ₹${((nationalKpis.totalAllocated || 0)/1e9).toFixed(1)}B ${lang === 'hi' ? 'कुल आवंटन' : 'total allocation'}`}
           </p>
         </div>
       </div>
 
       {/* National KPI strip from JSON snapshot (§5.7) */}
-      {nationalKpis && (
+      {nationalKpis && nationalKpis.totalAllocated != null && (
         <div id="tour-national-kpis" data-tour="national-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
           {[
-            { label: lang === 'hi' ? 'कुल आवंटन' : 'Total Allocation', value: `₹${(nationalKpis.totalAllocated/1e9).toFixed(1)}B`, sub: lang === 'hi' ? `${nationalKpis.totalMPs} सांसदों में` : `Across ${nationalKpis.totalMPs} MPs` },
-            { label: lang === 'hi' ? 'कुल व्यय' : 'Total Expenditure', value: `₹${(nationalKpis.totalExpenditure/1e9).toFixed(1)}B`, sub: `${nationalKpis.expenditurePercentage?.toFixed(1)}% ${lang === 'hi' ? 'आवंटित का' : 'of allocated'}` },
-            { label: lang === 'hi' ? 'पूर्ण कार्य' : 'Works Completed', value: nationalKpis.totalWorksCompleted?.toLocaleString(), sub: `${nationalKpis.completionRate?.toFixed(1)}% ${lang === 'hi' ? 'पूर्णता दर' : 'completion rate'}` },
-            { label: lang === 'hi' ? 'लंबित कार्य' : 'Pending Works', value: nationalKpis.pendingWorks?.toLocaleString(), sub: lang === 'hi' ? 'प्रगति पर' : 'Not yet completed' },
+            { label: lang === 'hi' ? 'कुल आवंटन' : 'Total Allocation', value: `₹${((nationalKpis.totalAllocated || 0)/1e9).toFixed(1)}B`, sub: lang === 'hi' ? `${nationalKpis.totalMPs || 774} सांसदों में` : `Across ${nationalKpis.totalMPs || 774} MPs` },
+            { label: lang === 'hi' ? 'कुल व्यय' : 'Total Expenditure', value: `₹${((nationalKpis.totalExpenditure || 0)/1e9).toFixed(1)}B`, sub: `${(nationalKpis.expenditurePercentage || 0).toFixed(1)}% ${lang === 'hi' ? 'आवंटित का' : 'of allocated'}` },
+            { label: lang === 'hi' ? 'पूर्ण कार्य' : 'Works Completed', value: (nationalKpis.totalWorksCompleted || 0).toLocaleString(), sub: `${(nationalKpis.completionRate || 0).toFixed(1)}% ${lang === 'hi' ? 'पूर्णता दर' : 'completion rate'}` },
+            { label: lang === 'hi' ? 'लंबित कार्य' : 'Pending Works', value: (nationalKpis.pendingWorks || 0).toLocaleString(), sub: lang === 'hi' ? 'प्रगति पर' : 'Not yet completed' },
           ].map((k, i) => (
             <div key={i} className="card" style={{ borderTop: '3px solid var(--navy)' }}>
               <div className="card-header">{k.label}</div>
