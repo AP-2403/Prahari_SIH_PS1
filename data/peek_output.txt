@@ -1,0 +1,21 @@
+﻿LOKSABHA COLS: ['Sr. No.', 'State', "Hon'ble Members of Parliaments", 'Constituency', 'Allocated AMOUNT ( Ôé╣ )']
+['1', 'Maharashtra', 'AASHTIKAR PATIL NAGESH BAPURAO', 'HINGOLI', '190289442']
+['2', 'Jammu And Kashmir', 'ABDUL RASHID SHEIKH', 'BARAMULLAH', '154773472.11']
+
+RAJYA COLS: ['Sr. No.', 'State', "Hon'ble Members of Parliament", 'Elected/Nominated', 'Allocated AMOUNT ( Ôé╣ )']
+['1', 'Telangana', 'Dr. Abhishek Manu Singhvi (2026-32) (2026-2032)', 'Elected MP', '73421449']
+['2', 'Maharashtra', 'Dr. Ajeet Madhavrao Gopchade (2024-30) (2024-2030)', 'Elected MP', '147000000']
+
+RECOMMENDED COLS: ['Work ID', 'Work Description', 'Category', 'MP Name', 'Constituency', 'State', 'House', 'Recommended Amount (Ôé╣)', 'Recommendation Date', 'Has Images', 'IDA']
+['311247', 'Improvement of road from Tangla Dimakuchi Road to Prabin Lakra house at Amguri under Bhergaon Dev Block (approx 2km)', 'Normal/Others', 'Shri Pramod Boro (2026-32)', 'Sitting Rajya Sabha', 'Assam', 'Rajya Sabha', '300000', '2026-09-02T00:00:00.000Z', 'false', 'UDALGURI(DEPUTY COMMISSIONER Udalguri_IDA)']
+
+COMPLETED COLS: ['Work ID', 'Work Description', 'Category', 'MP Name', 'Constituency', 'State', 'House', 'Final Amount (Ôé╣)', 'Completed Date', 'Has Images', 'Average Rating', 'IDA']
+['134703', 'Upgradation of Road from Madhavaram Village to Company Indlu of Madhavaram GP', 'Normal/Others', 'DAGGUMALLA PRASADA RAO', 'CHITTOOR', 'Andhra Pradesh', 'Lok Sabha', '499993', '2025-01-31T00:00:00.000Z', 'true', '', 'CHITTOOR(DISTRICT COLLECTOR CHITTOOR_IDA)']
+
+EXPENDITURES COLS: ['MP Name', 'Constituency', 'State', 'House', 'Work Description', 'Vendor', 'IDA', 'Expenditure Amount (Ôé╣)', 'Expenditure Date', 'Payment Status']
+['ATUL GARG', 'GHAZIABAD', 'Uttar Pradesh', 'Lok Sabha', 'Construction of roads, link roads, pathways or any other road with or without drainage system', 'DARSH BUILDCON', 'GHAZIABAD(DISTRICT MAGISTRAE GHAZIABAD_IDA)', '799146', '2026-08-21T00:00:00.000Z', 'Payment In-Progress']
+
+MP_SUMMARY COLS: ['MP Name', 'Constituency', 'State', 'House', 'Allocated Amount (Ôé╣)', 'Amount Recommended (Ôé╣)', 'Total Expenditure (Ôé╣)', 'Utilization %', 'Completed Works', 'Recommended Works', 'Completion Rate %', 'Balance Not Yet Paid to Vendors (Ôé╣)', 'Transaction Count', 'Successful Payments', 'Pending Payments', 'Average Rating']
+['ANDREW J. SYNGKON', 'SHILLONG', 'Meghalaya', 'Lok Sabha', '98000000', '98000000', '71430000', '100', '98', '241', '40.66', '26570000', '327', '321', '6', 'N/A']
+
+JSON: {'success': True, 'data': {'totalAllocated': 116819035627.53, 'totalExpenditure': 39953382732.14, 'totalRecommendedAmount': 79081497846.06, 'utilizationPercentage': 67.69572905755385, 'recommendationUtilizationPercentage': 67.69572905755385, 'utilizationDefinition': 'recommended_amount', 'expenditurePercentage': 34.201089332331755, 'totalMPs': 774, 'totalWorksCompleted': 44028, 'totalWorksRecommended': 131141, 'completionRate': 33.57302445459467, 'totalTransactions': 108695, 'avgAllocation': 150928986.59887597, 'pendingWorks': 87113, 'paymentGap': 39.714678301233555, 'completedWorksValue': 24086877004.61, 'inProgressPayments': 15867357422.53}, 'cached': True, 'cache_timestamp': '2026-09-22T16:19:22.062Z'}
