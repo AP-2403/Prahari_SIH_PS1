@@ -71,7 +71,7 @@
       "source": "/(.*)",
       "destination": {
         "service": "prahari-frontend",
-        "path": "/index.html"
+        "path": "/"
       }
     }
   ]
