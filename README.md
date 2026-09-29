@@ -12,14 +12,15 @@
 
 ## 🌐 Live Cloud Deployment
 
-| Component | Environment | Direct Access Link | Notes |
+| Component | Platform | Direct Access Link | Notes |
 |---|---|---|---|
-| **PRAHARI Platform** | Production (Cloud) | [**https://prahari-audit.onrender.com**](https://prahari-audit.onrender.com) | Unified React SPA + FastAPI backend |
-| **Interactive Swagger Docs** | Production (Cloud) | [**https://prahari-audit.onrender.com/docs**](https://prahari-audit.onrender.com/docs) | Interactive OpenAPI REST endpoints |
+| **PRAHARI Platform** | Render / Unified | [**https://prahari-audit.onrender.com**](https://prahari-audit.onrender.com) | Unified React SPA + FastAPI backend |
+| **Frontend CDN** | Vercel | [**https://prahari-audit.vercel.app**](https://prahari-audit.vercel.app) | Global Edge CDN with automated API rewrites |
+| **Interactive Swagger Docs** | Cloud API | [**https://prahari-audit.onrender.com/docs**](https://prahari-audit.onrender.com/docs) | Interactive OpenAPI REST endpoints |
 | **Citizen Social Audit** | Open Access | [**https://prahari-audit.onrender.com/citizen/work/1**](https://prahari-audit.onrender.com/citizen/work/1) | Zero-login public QR inspection view |
 
-> 💡 **Deploy in 1 Click on Render:**  
-> Connect this repository (`AP-2403/Prahari_SIH_PS1`) to [Render.com](https://render.com) using the included [`render.yaml`](./render.yaml) blueprint or Dockerfile for instant free cloud hosting. Detailed steps in the [Cloud Deployment Guide](#-1-click-cloud-deployment-guide) below.
+> 💡 **Deploy in 1 Click:**  
+> Connect this repository (`AP-2403/Prahari_SIH_PS1`) to **[Render.com](https://render.com)** (unified container) or **[Vercel.com](https://vercel.com)** (frontend CDN) with zero manual configuration. Detailed steps in the [Cloud Deployment Guide](#-1-click-cloud-deployment-guide) below.
 
 ---
 
@@ -238,13 +239,21 @@ PRAHARI is containerized with a production multi-stage [`Dockerfile`](./Dockerfi
 5. Click **Apply**. Within ~3–4 minutes, your live production service will be online at:
    `https://prahari-audit.onrender.com`
 
-### Option B: Deploy on Hugging Face Spaces (Free 16GB RAM)
+### Option B: Deploy Frontend on Vercel (Global Edge CDN)
+1. Sign in to **[vercel.com](https://vercel.com)** using your GitHub account (`AP-2403`).
+2. Click **"Add New..."** $\rightarrow$ **"Project"**.
+3. Import your repository: **`AP-2403/Prahari_SIH_PS1`**.
+4. Set **Root Directory** to `prahari/prahari-frontend` (or leave root — our included [`vercel.json`](./vercel.json) handles both automatically!).
+5. Click **Deploy**. Vercel will build the frontend and serve it at `https://prahari-audit.vercel.app`.
+   - All API requests to `/api/*` are automatically reverse-proxied to your backend without CORS issues!
+
+### Option C: Deploy on Hugging Face Spaces (Free 16GB RAM)
 1. Go to **[huggingface.co/new-space](https://huggingface.co/new-space)**.
 2. Set Space SDK to **Docker** (Blank).
 3. Connect your GitHub repository `AP-2403/Prahari_SIH_PS1`.
 4. Hugging Face builds the multi-stage Docker container with 16GB RAM for zero-latency AI scoring.
 
-### Option C: Run via Docker Locally
+### Option D: Run via Docker Locally
 ```bash
 # Build the unified container
 docker build -t prahari:latest .

@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "buildCommand": "cd prahari/prahari-frontend && npm install && npm run build",
+  "outputDirectory": "prahari/prahari-frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://prahari-audit.onrender.com/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://prahari-audit.onrender.com/uploads/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
