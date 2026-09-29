@@ -1,0 +1,14 @@
+.git
+.gitignore
+prahari/prahari-frontend/node_modules
+prahari/prahari-frontend/dist
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv
+env
+*.log
+.DS_Store
+Thumbs.db

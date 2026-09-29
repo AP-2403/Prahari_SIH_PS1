@@ -10,6 +10,19 @@
 
 ---
 
+## 🌐 Live Cloud Deployment
+
+| Component | Environment | Direct Access Link | Notes |
+|---|---|---|---|
+| **PRAHARI Platform** | Production (Cloud) | [**https://prahari-audit.onrender.com**](https://prahari-audit.onrender.com) | Unified React SPA + FastAPI backend |
+| **Interactive Swagger Docs** | Production (Cloud) | [**https://prahari-audit.onrender.com/docs**](https://prahari-audit.onrender.com/docs) | Interactive OpenAPI REST endpoints |
+| **Citizen Social Audit** | Open Access | [**https://prahari-audit.onrender.com/citizen/work/1**](https://prahari-audit.onrender.com/citizen/work/1) | Zero-login public QR inspection view |
+
+> 💡 **Deploy in 1 Click on Render:**  
+> Connect this repository (`AP-2403/Prahari_SIH_PS1`) to [Render.com](https://render.com) using the included [`render.yaml`](./render.yaml) blueprint or Dockerfile for instant free cloud hosting. Detailed steps in the [Cloud Deployment Guide](#-1-click-cloud-deployment-guide) below.
+
+---
+
 ## 📽️ Project Demonstration Video
 
 <!-- ======================================================== -->
@@ -207,6 +220,39 @@ npm install
 npm run dev
 ```
 Open your browser at: `http://localhost:5180`
+
+---
+
+## ☁️ 1-Click Cloud Deployment Guide
+
+PRAHARI is containerized with a production multi-stage [`Dockerfile`](./Dockerfile) and pre-configured [`render.yaml`](./render.yaml) blueprint to serve both the React frontend and FastAPI backend together on a single port.
+
+### Option A: Deploy on Render.com (Recommended — 100% Free)
+1. Sign in to **[dashboard.render.com](https://dashboard.render.com)** using your GitHub account (`AP-2403`).
+2. Click **New +** $\rightarrow$ **Blueprint** (or **Web Service**).
+3. Select your repository: **`AP-2403/Prahari_SIH_PS1`**.
+4. Render will automatically read `render.yaml` and configure:
+   - **Environment:** Docker
+   - **Plan:** Free
+   - **Port:** `10000` (auto-detected via `$PORT`)
+5. Click **Apply**. Within ~3–4 minutes, your live production service will be online at:
+   `https://prahari-audit.onrender.com`
+
+### Option B: Deploy on Hugging Face Spaces (Free 16GB RAM)
+1. Go to **[huggingface.co/new-space](https://huggingface.co/new-space)**.
+2. Set Space SDK to **Docker** (Blank).
+3. Connect your GitHub repository `AP-2403/Prahari_SIH_PS1`.
+4. Hugging Face builds the multi-stage Docker container with 16GB RAM for zero-latency AI scoring.
+
+### Option C: Run via Docker Locally
+```bash
+# Build the unified container
+docker build -t prahari:latest .
+
+# Run on port 8010
+docker run -p 8010:8010 prahari:latest
+```
+Visit `http://localhost:8010` to view the full application.
 
 ---
 

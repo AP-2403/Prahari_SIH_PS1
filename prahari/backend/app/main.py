@@ -18,13 +18,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5180",
-        "http://127.0.0.1:5180",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-    ],
+    allow_origin_regex=r"^https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -77,17 +71,38 @@ async def startup():
         db.close()
 
 
-@app.get("/")
-def root():
-    return {
-        "name": "PRAHARI",
-        "version": "1.0.0",
-        "description": "AI-powered MPLADS Fraud & Anomaly Detection",
-        "team": "The_Semicolons | SIH 2026 | PS ID 26102",
-        "docs": "/docs",
-    }
-
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# ── Mount Frontend SPA in production if built ──────────────────────────────
+FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "prahari-frontend" / "dist"
+if not FRONTEND_DIST.exists():
+    FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend_dist"
+
+if FRONTEND_DIST.exists():
+    from fastapi.responses import FileResponse
+    assets_dir = FRONTEND_DIST / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str = ""):
+        if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("openapi") or full_path.startswith("uploads"):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Not found")
+        target = FRONTEND_DIST / full_path
+        if full_path and target.is_file():
+            return FileResponse(str(target))
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
+else:
+    @app.get("/")
+    def root():
+        return {
+            "name": "PRAHARI",
+            "version": "1.0.0",
+            "description": "AI-powered MPLADS Fraud & Anomaly Detection",
+            "team": "The_Semicolons | SIH 2026 | PS ID 26102",
+            "docs": "/docs",
+        }
