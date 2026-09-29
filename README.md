@@ -12,16 +12,11 @@
 
 ## 🌐 Live Cloud Deployment
 
-| Component | Platform | Direct Access Link | Status | Notes |
-|---|---|---|---|---|
-| **PRAHARI Live Web App** | Vercel Multi-Services | [**https://praharisihps1.vercel.app**](https://praharisihps1.vercel.app) | 🟢 **LIVE** | Full application (React SPA + FastAPI backend) |
-| **Interactive API Swagger** | Vercel Backend | [**https://praharisihps1.vercel.app/docs**](https://praharisihps1.vercel.app/docs) | 🟢 **LIVE** | OpenAPI Interactive REST API Console |
-| **Citizen Social Audit** | Open Access | [**https://praharisihps1.vercel.app/citizen/work/1**](https://praharisihps1.vercel.app/citizen/work/1) | 🟢 **LIVE** | Zero-login public QR inspection view |
-| **API Health Check** | Vercel Backend | [**https://praharisihps1.vercel.app/health**](https://praharisihps1.vercel.app/health) | 🟢 **LIVE** | System status: `{"status": "ok"}` |
-| **Alternative Container** | Render.com | [**https://prahari-audit.onrender.com**](https://prahari-audit.onrender.com) | 🟢 Standby | Backup Docker blueprint deployment |
+| Component | Platform | Direct Access Link | Status |
+|---|---|---|---|
+| **PRAHARI Live Web App** | Vercel | [**https://praharisihps1.vercel.app**](https://praharisihps1.vercel.app) | 🟢 **LIVE** |
 
-> 🚀 **Vercel Multi-Services Architecture:**  
-> The project runs both the Vite React frontend and the Python FastAPI backend with pre-seeded database directly on Vercel under a unified domain with zero CORS friction.
+> 🚀 **Live Production Deployment:** The complete PRAHARI system (Vite React frontend + Python FastAPI audit engine with pre-seeded MoSPI dataset) is hosted live and operational on Vercel.
 
 ---
 
