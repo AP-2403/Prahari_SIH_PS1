@@ -50,9 +50,28 @@
       }
     },
     {
-      "source": "/(.*)",
+      "source": "/assets/(.*)",
       "destination": {
         "service": "prahari-frontend"
+      }
+    },
+    {
+      "source": "/favicon.svg",
+      "destination": {
+        "service": "prahari-frontend"
+      }
+    },
+    {
+      "source": "/icons.svg",
+      "destination": {
+        "service": "prahari-frontend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "prahari-frontend",
+        "path": "/index.html"
       }
     }
   ]
