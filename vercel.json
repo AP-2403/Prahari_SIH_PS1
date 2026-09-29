@@ -1,19 +1,59 @@
 {
-  "version": 2,
-  "buildCommand": "cd prahari/prahari-frontend && npm install && npm run build",
-  "outputDirectory": "prahari/prahari-frontend/dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "backend": {
+      "root": "prahari/backend",
+      "framework": "fastapi"
+    },
+    "prahari-frontend": {
+      "root": "prahari/prahari-frontend",
+      "framework": "vite",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "backend",
+          "format": "url",
+          "env": "BACKEND_URL"
+        }
+      ]
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://prahari-audit.onrender.com/api/:path*"
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
     },
     {
-      "source": "/uploads/:path*",
-      "destination": "https://prahari-audit.onrender.com/uploads/:path*"
+      "source": "/uploads/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/docs",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/openapi.json",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/health",
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "service": "prahari-frontend"
+      }
     }
   ]
 }
