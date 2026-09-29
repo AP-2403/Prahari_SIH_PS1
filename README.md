@@ -12,15 +12,16 @@
 
 ## 🌐 Live Cloud Deployment
 
-| Component | Platform | Direct Access Link | Notes |
-|---|---|---|---|
-| **PRAHARI Platform** | Render / Unified | [**https://prahari-audit.onrender.com**](https://prahari-audit.onrender.com) | Unified React SPA + FastAPI backend |
-| **Frontend CDN** | Vercel | [**https://prahari-audit.vercel.app**](https://prahari-audit.vercel.app) | Global Edge CDN with automated API rewrites |
-| **Interactive Swagger Docs** | Cloud API | [**https://prahari-audit.onrender.com/docs**](https://prahari-audit.onrender.com/docs) | Interactive OpenAPI REST endpoints |
-| **Citizen Social Audit** | Open Access | [**https://prahari-audit.onrender.com/citizen/work/1**](https://prahari-audit.onrender.com/citizen/work/1) | Zero-login public QR inspection view |
+| Component | Platform | Direct Access Link | Status | Notes |
+|---|---|---|---|---|
+| **PRAHARI Live Web App** | Vercel Multi-Services | [**https://praharisihps1.vercel.app**](https://praharisihps1.vercel.app) | 🟢 **LIVE** | Full application (React SPA + FastAPI backend) |
+| **Interactive API Swagger** | Vercel Backend | [**https://praharisihps1.vercel.app/docs**](https://praharisihps1.vercel.app/docs) | 🟢 **LIVE** | OpenAPI Interactive REST API Console |
+| **Citizen Social Audit** | Open Access | [**https://praharisihps1.vercel.app/citizen/work/1**](https://praharisihps1.vercel.app/citizen/work/1) | 🟢 **LIVE** | Zero-login public QR inspection view |
+| **API Health Check** | Vercel Backend | [**https://praharisihps1.vercel.app/health**](https://praharisihps1.vercel.app/health) | 🟢 **LIVE** | System status: `{"status": "ok"}` |
+| **Alternative Container** | Render.com | [**https://prahari-audit.onrender.com**](https://prahari-audit.onrender.com) | 🟢 Standby | Backup Docker blueprint deployment |
 
-> 💡 **Deploy in 1 Click:**  
-> Connect this repository (`AP-2403/Prahari_SIH_PS1`) to **[Render.com](https://render.com)** (unified container) or **[Vercel.com](https://vercel.com)** (frontend CDN) with zero manual configuration. Detailed steps in the [Cloud Deployment Guide](#-1-click-cloud-deployment-guide) below.
+> 🚀 **Vercel Multi-Services Architecture:**  
+> The project runs both the Vite React frontend and the Python FastAPI backend with pre-seeded database directly on Vercel under a unified domain with zero CORS friction.
 
 ---
 
