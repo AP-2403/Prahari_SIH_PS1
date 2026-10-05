@@ -24,7 +24,7 @@
 
 <div align="center">
   <a href="https://www.youtube.com/watch?v=T7u08LQ5FBo" target="_blank" rel="noopener noreferrer">
-    <img src="https://i.ytimg.com/vi/T7u08LQ5FBo/hqdefault.jpg" alt="PRAHARI SIH 2026 Project Demonstration Video" width="100%" style="max-width: 820px; border-radius: 14px; box-shadow: 0 12px 36px rgba(0,0,0,0.35); border: 2px solid #0D9488;" />
+    <img src="https://i.ytimg.com/vi/T7u08LQ5FBo/maxresdefault.jpg" alt="PRAHARI SIH 2026 Project Demonstration Video" width="100%" style="max-width: 820px; border-radius: 14px; box-shadow: 0 12px 36px rgba(0,0,0,0.35); border: 2px solid #0D9488;" />
   </a>
 
   <br /><br />
