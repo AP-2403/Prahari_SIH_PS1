@@ -63,9 +63,17 @@ export default function CitizenWork() {
         gap: 14,
         boxShadow: '0 4px 20px rgba(0, 48, 71, 0.15)'
       }}>
-        <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Shield size={22} color="var(--dark-neutral)" />
-        </div>
+        <img
+          src="/prahari-emblem.png"
+          alt="PRAHARI Data Governance Emblem"
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: '10px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 4px 14px rgba(13, 148, 136, 0.45))'
+          }}
+        />
         <div>
           <div style={{ color: 'white', fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.02em' }}>PRAHARI</div>
           <div style={{ color: 'var(--secondary)', fontSize: '0.72rem', fontWeight: 600 }}>MPLADS Public Transparency & Verification Portal</div>

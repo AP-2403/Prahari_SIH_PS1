@@ -9,7 +9,7 @@ export const TOUR_STEPS = [
     role: null,
     targetSelector: '#tour-login-card',
     fallbackSelector: '.login-card',
-    preferredSide: 'left',
+    preferredSide: 'right',
     title: {
       en: 'Role-Based Authentication & Access Personas',
       hi: 'भूमिका-आधारित प्रमाणीकरण एवं उपयोगकर्ता खाते'
@@ -49,7 +49,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-upload-card',
     fallbackSelector: '.drop-zone',
-    preferredSide: 'right',
+    preferredSide: 'bottom',
     title: {
       en: 'Data Ingestion & MoSPI DPR Upload Center',
       hi: 'डेटा अंतर्ग्रहण एवं सांख्यिकी मंत्रालय डीपीआर अपलोड केंद्र'
@@ -71,14 +71,10 @@ export const TOUR_STEPS = [
       hi: 'कॉलम मैपिंग और डेटा पूर्वावलोकन देखने के लिए "दस्तावेज़ देखें" पर क्लिक करें, या लाइव प्रक्रिया देखने के लिए "पाइपलाइन चलाएं" पर क्लिक करें।'
     },
     liveAction: {
-      label: { en: '📄 Click Demo Document & Process Live', hi: '📄 डेमो दस्तावेज़ लोड करें और लाइव चलाएं' },
+      label: { en: '👁️ Inspect Demo MoSPI DPR Document', hi: '👁️ डेमो दस्तावेज़ पूर्वावलोकन देखें' },
       execute: () => {
         const viewBtn = document.querySelector('#tour-demo-doc-btn');
         if (viewBtn) viewBtn.click();
-        setTimeout(() => {
-          const procBtn = document.querySelector('#tour-demo-process-btn');
-          if (procBtn) procBtn.click();
-        }, 600);
       }
     }
   },
@@ -88,7 +84,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-processing-console',
     fallbackSelector: '.card:has(.progress-fill)',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Real-Time Multi-Engine Processing Console',
       hi: 'रीयल-टाइम मल्टी-इंजन प्रोसेसिंग कंसोल'
@@ -109,7 +105,13 @@ export const TOUR_STEPS = [
       en: 'The console executes in asynchronous background workers with automated error isolation so corrupt rows never halt batch processing.',
       hi: 'कंसोल बैकग्राउंड वर्कर में चलता है जिससे त्रुटिपूर्ण पंक्तियों के कारण संपूर्ण डेटा अपलोड बाधित नहीं होता।'
     },
-    liveAction: null
+    liveAction: {
+      label: { en: '🔄 Re-run Pipeline Execution Log', hi: '🔄 पाइपलाइन निष्पादन पुनः चलाएं' },
+      execute: () => {
+        const rerunBtn = document.querySelector('#tour-rerun-btn');
+        if (rerunBtn) rerunBtn.click();
+      }
+    }
   },
   {
     step: 4,
@@ -204,7 +206,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-hero-map',
     fallbackSelector: '.card:has(.leaflet-container), .card:has(.map-placeholder)',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Constituency Geospatial Risk Heatmap',
       hi: 'संसदीय क्षेत्र-स्तरीय भू-स्थानिक जोखिम मानचित्र'
@@ -233,7 +235,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-charts-row',
     fallbackSelector: '.card:has(.recharts-responsive-container)',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Statistical Breakdown Charts & Efficiency Gauges',
       hi: 'सांख्यिकी विश्लेषण चार्ट एवं उपयोगिता गेज'
@@ -262,7 +264,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-trend-chart',
     fallbackSelector: '.card:has(.recharts-line)',
-    preferredSide: 'left',
+    preferredSide: 'right',
     title: {
       en: 'Monthly Sanctions vs Disbursements Trend',
       hi: 'मासिक स्वीकृति बनाम संवितरण रुझान चार्ट'
@@ -291,7 +293,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-top-risk-works',
     fallbackSelector: 'table.data-table',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Prioritized High-Risk Works Registry',
       hi: 'प्राथमिकता प्राप्त उच्च जोखिम कार्य पंजी'
@@ -324,8 +326,7 @@ export const TOUR_STEPS = [
     route: '/admin/works/1',
     role: 'admin',
     targetSelector: '#tour-multimodal-card',
-    fallbackSelector: '.card:has(.progress-bar)',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Multimodal Photographic & Milestone Verification',
       hi: 'बहुआयामी फोटोग्राफिक एवं प्रगति चरण सत्यापन'
@@ -349,10 +350,14 @@ export const TOUR_STEPS = [
     liveAction: {
       label: { en: '📸 Quick-Load 100% Milestone & Photo', hi: '📸 100% चरण एवं पूर्ण फोटो लोड करें' },
       execute: () => {
-        const btn100 = document.querySelector('#tour-btn-100');
-        if (btn100) btn100.click();
-        const loadSampleBtn = document.querySelector('#tour-load-sample-btn');
-        if (loadSampleBtn) loadSampleBtn.click();
+        const openBtn = document.querySelector('#tour-open-upload-btn');
+        if (openBtn) openBtn.click();
+        setTimeout(() => {
+          const btn100 = document.querySelector('#tour-btn-100');
+          if (btn100) btn100.click();
+          const loadSampleBtn = document.querySelector('#tour-load-sample-btn');
+          if (loadSampleBtn) loadSampleBtn.click();
+        }, 150);
       }
     }
   },
@@ -361,8 +366,7 @@ export const TOUR_STEPS = [
     route: '/admin/works/1',
     role: 'admin',
     targetSelector: '#tour-gps-toggle',
-    fallbackSelector: '#tour-multimodal-card form',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Anti-Spoofing & Geodesic Fraud Detection Engine',
       hi: 'एंटी-स्पूफिंग एवं भौगोलिक धोखाधड़ी पहचान इंजन'
@@ -396,8 +400,7 @@ export const TOUR_STEPS = [
     route: '/admin/works/1',
     role: 'admin',
     targetSelector: '#tour-shap-card',
-    fallbackSelector: '.card:has(.progress-fill)',
-    preferredSide: 'right',
+    preferredSide: 'bottom',
     title: {
       en: 'Explainable AI (SHAP Reasoning & MoSPI Clauses)',
       hi: 'व्याख्यात्मक एआई (SHAP कारण एवं कानूनी धाराएं)'
@@ -426,7 +429,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-review-queue',
     fallbackSelector: '.card:has(table.data-table)',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Central Auditor Review & Triage Queue',
       hi: 'केंद्रीय ऑडिट समीक्षा एवं निवारण कतार'
@@ -455,7 +458,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-vendor-graph',
     fallbackSelector: '.card:has(div[style*="height: 500"])',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Vendor-MP Collusion Ring Intelligence Graph',
       hi: 'विक्रेता-सांसद सांठगांठ कार्टेल ग्राफ'
@@ -483,8 +486,7 @@ export const TOUR_STEPS = [
     route: '/admin/engines',
     role: 'admin',
     targetSelector: '#tour-engine-cards',
-    fallbackSelector: '.card:has(.progress-fill)',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'AI Core Heuristics & Engine Control Panel',
       hi: 'एआई कोर नियम एवं इंजन नियंत्रण कक्ष'
@@ -513,7 +515,7 @@ export const TOUR_STEPS = [
     role: 'admin',
     targetSelector: '#tour-assistant-panel',
     fallbackSelector: '.card:has(input)',
-    preferredSide: 'left',
+    preferredSide: 'right',
     title: {
       en: 'AI Assistant, Chatbot & Text-to-SQL Querying',
       hi: 'एआई सहायक, चैटबॉट एवं टेक्स्ट-टू-एसक्यूएल क्वेरी'
@@ -542,7 +544,7 @@ export const TOUR_STEPS = [
     role: null,
     targetSelector: '#tour-citizen-badge',
     fallbackSelector: '.card:has(h2)',
-    preferredSide: 'left',
+    preferredSide: 'bottom',
     title: {
       en: 'Public Citizen Transparency & Whistleblower Portal',
       hi: 'सार्वजनिक नागरिक पारदर्शिता एवं व्हिसलब्लोअर पोर्टल'
@@ -576,8 +578,8 @@ export const TOUR_STEPS = [
       hi: 'डेमो सफलतापूर्वक पूर्ण हुआ!'
     },
     action: {
-      en: '⏹ CUT & STOP SCREEN RECORDING NOW',
-      hi: '⏹ अब स्क्रीन रिकॉर्डिंग बंद करें'
+      en: 'End-to-End Audit Walkthrough Complete',
+      hi: 'एंड-टू-एंड ऑडिट वॉकथ्रू पूर्ण'
     },
     dataFlow: {
       en: 'DATA FLOW SUMMARY: You have completed the full end-to-end PRAHARI demonstration. From initial MoSPI DPR ingestion and multi-engine screening, through geospatial maps, multimodal photographic validation, and explainable SHAP reasoning, all the way to citizen oversight.',
@@ -693,10 +695,18 @@ export function DemoTourProvider({ children }) {
   const flipSide = useCallback(() => {
     setOverrideSide((prev) => {
       if (!prev) {
-        const defaultSide = currentStep?.preferredSide || 'left';
-        return defaultSide === 'left' ? 'right' : defaultSide === 'right' ? 'left' : defaultSide === 'top' ? 'bottom' : 'top';
+        const defaultSide = currentStep?.preferredSide || 'bottom';
+        if (defaultSide === 'bottom') return 'top';
+        if (defaultSide === 'top') return 'bottom';
+        if (defaultSide === 'left') return 'right';
+        if (defaultSide === 'right') return 'left';
+        return 'top';
       }
-      return prev === 'left' ? 'right' : prev === 'right' ? 'left' : prev === 'top' ? 'bottom' : 'top';
+      if (prev === 'bottom') return 'top';
+      if (prev === 'top') return 'bottom';
+      if (prev === 'left') return 'right';
+      if (prev === 'right') return 'left';
+      return 'bottom';
     });
   }, [currentStep]);
 
@@ -710,8 +720,8 @@ export function DemoTourProvider({ children }) {
 
     function handleKeyDown(e) {
       // Don't trigger if user is actively typing in an input/textarea
-      const tag = e.target.tagName.toLowerCase();
-      if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+      const tag = e.target?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || e.target?.isContentEditable) return;
 
       if (e.key === 'ArrowRight' || e.key === 'KeyD') {
         e.preventDefault();
@@ -731,6 +741,20 @@ export function DemoTourProvider({ children }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isActive, nextStep, prevStep, endTour, flipSide]);
+
+  // Expose global controller for automated testing
+  useEffect(() => {
+    window.__PRAHARI_TOUR = {
+      startTour,
+      jumpToStep,
+      nextStep,
+      prevStep,
+      endTour,
+      flipSide,
+      currentStepIndex,
+      isActive
+    };
+  }, [startTour, jumpToStep, nextStep, prevStep, endTour, flipSide, currentStepIndex, isActive]);
 
   return (
     <DemoTourContext.Provider

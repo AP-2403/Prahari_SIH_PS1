@@ -51,9 +51,13 @@ def get_current_user(
     # Seamless support for PRAHARI guided demo tour token
     if credentials.credentials == "demo_admin_jwt_token_sih2026":
         admin_user = db.query(User).filter(User.username == "admin").first()
-        if admin_user:
-            return admin_user
-        return User(id=1, username="admin", role="admin")
+        return admin_user if admin_user else User(id=1, username="admin", role="admin")
+    if credentials.credentials == "demo_mp_jwt_token":
+        mp_user = db.query(User).filter(User.username == "mp.singhvi").first()
+        return mp_user if mp_user else User(id=2, username="mp.singhvi", role="mp_user", linked_mp_id=544)
+    if credentials.credentials == "demo_district_jwt_token":
+        dist_user = db.query(User).filter(User.username == "district.chittoor").first()
+        return dist_user if dist_user else User(id=5, username="district.chittoor", role="district_user", linked_constituency="CHITTOOR", linked_state="Andhra Pradesh")
 
     try:
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])

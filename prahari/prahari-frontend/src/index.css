@@ -9,40 +9,49 @@
    Light Neutral:  #E5F7FF (Off-white Ice)
    ──────────────────────────────────────────────────────────────────────── */
 :root {
-  /* Brand palette */
-  --primary:        #9bdeff;
-  --secondary:      #9bffee;
-  --accent:         #9bacff;
-  --dark-neutral:   #003047;
-  --light-neutral:  #E5F7FF;
+  /* Modern High-End Palette */
+  --primary:        #9BDEFF;
+  --secondary:      #9BFFEE;
+  --accent:         #9BACFF;
+  --dark-neutral:   #002B49;
+  --light-neutral:  #F4F8FA;
 
   /* Semantic UI mappings */
-  --navy:           #003047;
-  --navy-dark:      #001e2d;
+  --navy:           #002B49;
+  --navy-dark:      #020E18;
   --navy-light:     #004566;
-  --surface:        #E5F7FF;
-  --surface-2:      #D4F0FD;
+  --surface:        #F1F6FA;
+  --surface-2:      #E4EFF7;
   --surface-card:   #FFFFFF;
-  --border:         #BEE3F8;
-  --border-subtle:  #D7EFFC;
-  --text-primary:   #003047;
-  --text-muted:     #2B5F75;
+  --border:         #D0E3F0;
+  --border-subtle:  #E5F0F8;
+  --text-primary:   #002B49;
+  --text-muted:     #3B6C82;
 
-  /* Status accents */
+  /* Luminous status accents */
   --amber:          #F59E0B;
-  --amber-light:    #FDE68A;
+  --amber-light:    #FEF3C7;
   --red-risk:       #DC2626;
   --green-clean:    #0D9488;
+  --teal-glow:      rgba(13, 148, 136, 0.35);
+  --cyan-accent:    #06B6D4;
 }
 
 * { box-sizing: border-box; }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--surface);
   color: var(--text-primary);
   margin: 0;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.012em;
+}
+
+h1, h2, h3, h4, .kpi-value, .brand-font {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.025em;
 }
 
 /* ─── Risk badge colours ────────────────────────────────────────────── */
@@ -90,13 +99,14 @@ body {
 .card {
   background: var(--surface-card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 4px 20px rgba(0, 48, 71, 0.04);
-  transition: box-shadow 0.2s ease;
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 4px 20px -2px rgba(0, 32, 64, 0.05), 0 1px 3px rgba(0, 32, 64, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .card:hover {
-  box-shadow: 0 6px 24px rgba(0, 48, 71, 0.07);
+  box-shadow: 0 10px 30px -5px rgba(0, 32, 64, 0.09), 0 2px 6px rgba(0, 32, 64, 0.04);
+  border-color: #B6D7EC;
 }
 .card-header {
   font-size: 0.825rem;
@@ -279,38 +289,155 @@ body {
 }
 
 /* ─── Login ──────────────────────────────────────────────────────────── */
-/* ─── Login ──────────────────────────────────────────────────────────── */
-.login-hero {
+/* ─── Modern Welcoming Portal & Authentication ────────────────────────── */
+.login-portal {
   min-height: 100vh;
-  background: 
-    linear-gradient(135deg, rgba(0, 30, 45, 0.88) 0%, rgba(0, 48, 71, 0.82) 50%, rgba(0, 70, 104, 0.85) 100%),
-    url('/assets/bg-hero.png') center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: radial-gradient(circle at 10% 20%, #041424 0%, #020A13 60%, #01060C 100%);
+  color: #FFFFFF;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
-.login-hero::before {
-  content: '';
+
+/* Ambient Floating Lighting Spheres */
+.portal-orb-1 {
+  position: absolute;
+  top: -8%;
+  left: 15%;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.22) 0%, rgba(13, 148, 136, 0.04) 50%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(40px);
+  animation: floatOrb 12s ease-in-out infinite alternate;
+}
+.portal-orb-2 {
+  position: absolute;
+  bottom: 5%;
+  right: 10%;
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.03) 50%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(50px);
+  animation: floatOrb 16s ease-in-out infinite alternate-reverse;
+}
+.portal-orb-3 {
+  position: absolute;
+  top: 40%;
+  left: -5%;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(40px);
+  animation: floatOrb 14s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb {
+  0% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-25px) scale(1.05); }
+  100% { transform: translateY(15px) scale(0.95); }
+}
+
+/* Subtle Technical Grid Overlay */
+.portal-grid-bg {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle at 15% 85%, rgba(155, 255, 238, 0.18) 0%, transparent 45%),
-                    radial-gradient(circle at 85% 15%, rgba(155, 222, 255, 0.25) 0%, transparent 45%),
-                    radial-gradient(circle at 50% 50%, rgba(155, 172, 255, 0.12) 0%, transparent 60%);
+  background-image: 
+    linear-gradient(to right, rgba(155, 222, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(155, 222, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 50%, #000 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 60%, transparent 100%);
   pointer-events: none;
 }
-.login-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(155, 222, 255, 0.5);
-  border-radius: 20px;
-  padding: 42px 38px;
-  width: 440px;
-  box-shadow: 0 25px 60px rgba(0, 24, 38, 0.4);
+
+/* Main Container Grid (Two Columns: Showcase + Auth) */
+.portal-container {
+  max-width: 1340px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 36px 48px;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 56px;
+  align-items: center;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  flex: 1;
+}
+
+@media (max-width: 1024px) {
+  .portal-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 24px 20px 40px;
+  }
+}
+
+/* Login Card Glassmorphic Housing */
+.login-card {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(226, 232, 240, 0.9);
+  border-radius: 22px;
+  padding: 34px 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 
+    0 25px 60px -10px rgba(0, 16, 28, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 10;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.login-card:hover {
+  box-shadow: 
+    0 30px 70px -10px rgba(0, 16, 28, 0.6),
+    0 0 0 1px rgba(13, 148, 136, 0.4);
+}
+
+/* Persona Selection Cards */
+.persona-btn {
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--navy);
+  font-family: inherit;
+}
+.persona-btn:hover {
+  background: #F0FDF4;
+  border-color: #0D9488;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.12);
+}
+.persona-btn.active {
+  background: linear-gradient(135deg, #F0FDF4 0%, #E6FFFA 100%);
+  border-color: #0D9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.25), 0 4px 14px rgba(13, 148, 136, 0.15);
+}
+
+/* Ambient glow accent utilities */
+.glow-teal-ring {
+  box-shadow: 0 0 20px rgba(13, 148, 136, 0.35);
+}
+.glow-amber-ring {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
 }
 
 /* ─── Hero Banner with AI Surveillance Background ────────────────────── */
@@ -413,3 +540,17 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ─── Voice Narration Sound-Wave Bars ───────────────────────────────── */
+@keyframes voiceBar0 {
+  0%   { height: 4px; }
+  100% { height: 16px; }
+}
+@keyframes voiceBar1 {
+  0%   { height: 10px; }
+  100% { height: 18px; }
+}
+@keyframes voiceBar2 {
+  0%   { height: 6px; }
+  100% { height: 13px; }
+}

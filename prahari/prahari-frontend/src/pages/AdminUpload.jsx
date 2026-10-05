@@ -1,14 +1,16 @@
 /**
  * Admin Upload page — drag-drop + column mapping preview + Processing Console (§3.1)
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { upload as uploadApi } from '../api/client';
-import { Upload, CheckCircle, AlertTriangle, Loader } from 'lucide-react';
+import { Upload, CheckCircle, AlertTriangle, Loader, RotateCw } from 'lucide-react';
+import { useDemoTour } from '../context/DemoTourContext';
 
 const STAGES = ['parsing', 'ingesting', 'scoring', 'done'];
 
 export default function AdminUpload() {
+  const { isActive: isTourActive, currentStep } = useDemoTour();
   const [dragOver, setDragOver] = useState(false);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -17,6 +19,35 @@ export default function AdminUpload() {
   const [error, setError] = useState('');
   const fileRef = useRef();
   const pollRef = useRef();
+  const demoTimersRef = useRef([]);
+
+  const clearDemoTimers = () => {
+    demoTimersRef.current.forEach(t => clearTimeout(t));
+    demoTimersRef.current = [];
+  };
+
+  useEffect(() => {
+    return () => clearDemoTimers();
+  }, []);
+
+  // Synchronize with Interactive Demo Tour
+  useEffect(() => {
+    if (!isTourActive) return;
+
+    // Step 3 is "Real-Time Multi-Engine Processing Console"
+    // Auto-launch the live simulated processing console if not already active
+    if (currentStep?.step === 3 && !jobId) {
+      simulateLiveDemoPipeline();
+    }
+
+    // Step 2 is "Data Ingestion & MoSPI DPR Upload Center"
+    // Reset to upload card view if stepping back so #tour-upload-card is present
+    if (currentStep?.step === 2 && jobId) {
+      clearDemoTimers();
+      setJobId(null);
+      setJobStatus(null);
+    }
+  }, [isTourActive, currentStep?.step, jobId]);
 
   async function handleFile(file) {
     if (!file) return;
@@ -59,6 +90,7 @@ export default function AdminUpload() {
   }
 
   function reset() {
+    clearDemoTimers();
     setPreview(null);
     setJobId(null);
     setJobStatus(null);
@@ -92,6 +124,7 @@ export default function AdminUpload() {
   }
 
   function simulateLiveDemoPipeline() {
+    clearDemoTimers();
     setJobId('demo_job_' + Date.now());
     setJobStatus({
       status: 'running',
@@ -104,7 +137,7 @@ export default function AdminUpload() {
       ]
     });
 
-    setTimeout(() => {
+    const t1 = setTimeout(() => {
       setJobStatus({
         status: 'running',
         stage: 'ingesting',
@@ -120,7 +153,7 @@ export default function AdminUpload() {
       });
     }, 1200);
 
-    setTimeout(() => {
+    const t2 = setTimeout(() => {
       setJobStatus({
         status: 'running',
         stage: 'scoring',
@@ -139,7 +172,7 @@ export default function AdminUpload() {
       });
     }, 2400);
 
-    setTimeout(() => {
+    const t3 = setTimeout(() => {
       setJobStatus({
         status: 'done',
         stage: 'done',
@@ -160,6 +193,8 @@ export default function AdminUpload() {
         ]
       });
     }, 3800);
+
+    demoTimersRef.current = [t1, t2, t3];
   }
 
   return (
@@ -306,11 +341,23 @@ export default function AdminUpload() {
                 {jobStatus?.status === 'done' ? '✅ Complete' : jobStatus?.status === 'error' ? '❌ Error' : `⚙️ ${jobStatus?.stage}…`}
               </div>
             </div>
-            {jobStatus?.status === 'done' && (
-              <button className="btn btn-primary btn-sm" onClick={reset} style={{ marginLeft: 'auto' }}>
-                Upload Another File
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+              <button
+                id="tour-rerun-btn"
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={simulateLiveDemoPipeline}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+              >
+                <RotateCw size={13} />
+                Re-run Simulation
               </button>
-            )}
+              {jobStatus?.status === 'done' && (
+                <button className="btn btn-primary btn-sm" onClick={reset}>
+                  Upload Another File
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Progress bar */}

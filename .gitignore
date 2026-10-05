@@ -55,3 +55,12 @@ desktop.ini
 .tempmediaStorage/
 scratch/
 browser/
+
+# Temporary test screenshots & root artifacts
+/*.png
+/prahari.db
+/generate_tour_pdf.py
+/tour_dialogues_print.html
+/tour_steps_data.json
+/PRAHARI_Demo_Tour_Voice_Dialogues_Guide.pdf
+/data/*.zip

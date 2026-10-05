@@ -374,6 +374,8 @@ export default function WorkDetail() {
               Submit geotagged photos or site evidence to advance milestone or conclude work.
             </div>
             <button
+              id="tour-open-upload-btn"
+              data-tour="open-upload-btn"
               className="btn btn-primary btn-sm"
               onClick={() => setShowUploadForm(!showUploadForm)}
               style={{ display: 'flex', alignItems: 'center', gap: 6 }}

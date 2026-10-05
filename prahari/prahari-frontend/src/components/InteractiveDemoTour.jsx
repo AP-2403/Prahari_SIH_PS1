@@ -1,12 +1,110 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Sparkles, ArrowRight, ArrowLeft, X, MoveHorizontal, CheckCircle2,
-  Video, Play, StopCircle, ShieldAlert, Cpu, Eye, ExternalLink, Lightbulb,
-  Database, BarChart3, ShieldCheck
+  ArrowRight, ArrowLeft, X, MoveHorizontal, CheckCircle2,
+  Lightbulb, ShieldCheck, Volume2, VolumeX, RotateCcw,
+  Pause, Play
 } from 'lucide-react';
 import { useDemoTour, TOUR_STEPS } from '../context/DemoTourContext';
 import { useLanguage } from '../context/LanguageContext';
+
+// ── Voice Narration Hook ──────────────────────────────────────────────
+function useVoiceNarration(stepIndex, isActive) {
+  const audioRef = useRef(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Load + auto-play new audio whenever step changes
+  useEffect(() => {
+    if (!isActive) return;
+
+    // Stop previous
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
+
+    const stepNum = String(stepIndex + 1).padStart(2, '0');
+    const audio = new Audio();
+    const canPlayM4a = audio.canPlayType('audio/mp4') || audio.canPlayType('audio/x-m4a');
+    audio.src = canPlayM4a ? `/audio/step-${stepNum}.m4a` : `/audio/step-${stepNum}.mp3`;
+    audio.muted = isMuted;
+    audioRef.current = audio;
+
+    audio.addEventListener('playing', () => { setIsPlaying(true); setIsSpeaking(true); });
+    audio.addEventListener('pause',   () => { setIsPlaying(false); setIsSpeaking(false); });
+    audio.addEventListener('ended',   () => { setIsPlaying(false); setIsSpeaking(false); });
+    audio.addEventListener('error',   () => {
+      // Fallback from m4a to mp3 if needed
+      if (audio.src.endsWith('.m4a')) {
+        audio.src = `/audio/step-${stepNum}.mp3`;
+        audio.play().catch(() => { setIsPlaying(false); setIsSpeaking(false); });
+      } else {
+        setIsPlaying(false);
+        setIsSpeaking(false);
+      }
+    });
+
+    // Auto-play narration for active step
+    audio.play().catch(() => setIsPlaying(false));
+
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepIndex, isActive]);
+
+  // Mute toggling
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = isMuted;
+  }, [isMuted]);
+
+  const replay = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+  }, []);
+
+  const togglePause = useCallback(() => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
+  }, []);
+
+  const toggleMute = useCallback(() => setIsMuted(m => !m), []);
+
+  return { isMuted, isPlaying, isSpeaking, replay, togglePause, toggleMute };
+}
+
+// ── Animated Sound-Wave Bars ──────────────────────────────────────────
+function SoundWave({ active }) {
+  const bars = [0.5, 1, 0.7, 0.9, 0.6, 1, 0.4, 0.8, 0.5];
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 2, height: 18,
+    }}>
+      {bars.map((h, i) => (
+        <div
+          key={i}
+          style={{
+            width: 3,
+            borderRadius: 2,
+            background: active ? '#0D9488' : '#CBD5E1',
+            height: active ? `${Math.round(h * 18)}px` : '4px',
+            transition: 'height 0.15s ease',
+            animation: active ? `voiceBar${i % 3} ${0.5 + i * 0.07}s ease-in-out infinite alternate` : 'none',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function InteractiveDemoTour() {
   const {
@@ -23,12 +121,16 @@ export default function InteractiveDemoTour() {
     totalSteps
   } = useDemoTour();
 
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
 
   const [targetRect, setTargetRect] = useState(null);
   const [targetFound, setTargetFound] = useState(false);
   const retryTimerRef = useRef(null);
+
+  // Voice narration
+  const { isMuted, isPlaying, isSpeaking, replay, togglePause, toggleMute } =
+    useVoiceNarration(currentStepIndex, isActive);
 
   // Update target rect with padding
   const updateBoundingRect = useCallback(() => {
@@ -58,10 +160,17 @@ export default function InteractiveDemoTour() {
       });
     } else {
       setTargetFound(false);
+      setTargetRect(null);
     }
   }, [currentStep]);
 
-  // Poll for element and scroll into view smoothly
+  // Immediately clear stale target rect when changing step
+  useEffect(() => {
+    setTargetRect(null);
+    setTargetFound(false);
+  }, [currentStepIndex]);
+
+  // Poll for element and scroll into view smoothly with proper clearances
   useEffect(() => {
     if (!isActive || !currentStep) return;
 
@@ -77,8 +186,30 @@ export default function InteractiveDemoTour() {
       }
 
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const vw = window.innerWidth;
+        const rect = el.getBoundingClientRect();
+        const isWide = rect.width > vw * 0.45;
+        const intendedSide = overrideSide || currentStep.preferredSide || (isWide ? 'bottom' : 'left');
+
+        if (intendedSide === 'top') {
+          el.style.scrollMarginBottom = '50px';
+          el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        } else {
+          el.style.scrollMarginTop = '78px';
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         updateBoundingRect();
+        const t1 = setTimeout(updateBoundingRect, 100);
+        const t2 = setTimeout(updateBoundingRect, 250);
+        const t3 = setTimeout(updateBoundingRect, 500);
+        const t4 = setTimeout(updateBoundingRect, 800);
+        return () => {
+          clearTimeout(t1);
+          clearTimeout(t2);
+          clearTimeout(t3);
+          clearTimeout(t4);
+        };
       } else if (attempts < maxAttempts) {
         attempts++;
         retryTimerRef.current = setTimeout(findAndScroll, 120);
@@ -90,7 +221,7 @@ export default function InteractiveDemoTour() {
     return () => {
       if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     };
-  }, [isActive, currentStep, updateBoundingRect]);
+  }, [isActive, currentStep, overrideSide, updateBoundingRect]);
 
   // Listen for window resize, scroll, and content changes
   useEffect(() => {
@@ -194,36 +325,6 @@ export default function InteractiveDemoTour() {
             </div>
           </div>
 
-          {/* ⏹ Prominent Screen Recording Cut Banner */}
-          <div style={{
-            background: 'linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)',
-            border: '2px dashed #EF4444',
-            borderRadius: 14,
-            padding: '16px 20px',
-            marginBottom: 24,
-            boxShadow: '0 4px 20px rgba(239, 68, 68, 0.15)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
-              <span style={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                background: '#DC2626',
-                display: 'inline-block',
-                boxShadow: '0 0 12px #DC2626',
-                animation: 'pulse 1s infinite'
-              }} />
-              <span style={{ fontSize: '1.1rem', fontWeight: 850, color: '#991B1B', letterSpacing: '0.04em' }}>
-                {currentStep.action[lang] || currentStep.action.en}
-              </span>
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#B91C1C', fontWeight: 500 }}>
-              {lang === 'hi'
-                ? 'आपका संपूर्ण एंड-टू-एंड डेमो पूर्ण हो गया है। एसआईएच मूल्यांकन वीडियो के लिए रिकॉर्डिंग यहीं समाप्त करें।'
-                : 'Your complete demonstration is finished. Stop and cut your screen recording here for SIH submission.'}
-            </div>
-          </div>
-
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button
@@ -250,7 +351,7 @@ export default function InteractiveDemoTour() {
   const PAD = 8;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const CARD_WIDTH = Math.min(410, vw - 28);
+  const CARD_WIDTH = Math.min(390, vw - 32);
 
   let top = 0;
   let bottom = 0;
@@ -274,36 +375,46 @@ export default function InteractiveDemoTour() {
   const spaceLeft = left;
   const spaceRight = vw - right;
 
-  // Determine computedSide if not manually overridden by user
-  let computedSide = currentStep.preferredSide || 'left';
+  // Minimum clearance needed to safely dock on left or right without colliding
+  // Adapts down to 300px so cards can dock alongside panels on laptops & desktop screens
+  const canFitLeft = spaceLeft >= 300;
+  const canFitRight = spaceRight >= 300;
 
-  if (!overrideSide && targetRect) {
-    const isWide = width > vw * 0.58;
+  // Determine computedSide
+  let computedSide = currentStep.preferredSide || 'bottom';
 
-    if (isWide) {
-      // Element spans wide across viewport
-      if (spaceBottom >= 320) {
-        computedSide = 'bottom';
-      } else if (spaceTop >= 320) {
+  if (overrideSide) {
+    if (overrideSide === 'left' && !canFitLeft) {
+      computedSide = spaceBottom >= 260 ? 'bottom' : (canFitRight ? 'right' : 'top');
+    } else if (overrideSide === 'right' && !canFitRight) {
+      computedSide = spaceBottom >= 260 ? 'bottom' : (canFitLeft ? 'left' : 'top');
+    } else {
+      computedSide = overrideSide;
+    }
+  } else if (targetRect) {
+    if (currentStep.preferredSide === 'right' && canFitRight) {
+      computedSide = 'right';
+    } else if (currentStep.preferredSide === 'left' && canFitLeft) {
+      computedSide = 'left';
+    } else if (currentStep.preferredSide === 'top' && (spaceTop >= 220 || spaceTop > spaceBottom)) {
+      computedSide = 'top';
+    } else if (currentStep.preferredSide === 'bottom' && spaceBottom >= 260) {
+      computedSide = 'bottom';
+    } else {
+      // Automatic fallback if preferred side doesn't have sufficient room
+      if (canFitRight && (!canFitLeft || spaceRight >= spaceLeft)) {
+        computedSide = 'right';
+      } else if (canFitLeft) {
+        computedSide = 'left';
+      } else if (spaceTop >= 240 || spaceTop > spaceBottom) {
         computedSide = 'top';
       } else {
-        // Limited space vertically: dock to side/corner with most space
-        computedSide = spaceLeft >= spaceRight ? 'left' : 'right';
-      }
-    } else {
-      // Element is in left or right half
-      const targetCenterX = left + width / 2;
-      if (targetCenterX > vw * 0.5) {
-        computedSide = 'left';
-      } else {
-        computedSide = 'right';
+        computedSide = 'bottom';
       }
     }
-  } else if (overrideSide) {
-    computedSide = overrideSide;
   }
 
-  // ── Compute Collision-Free Docking Coordinates (Strict Zero-Overflow Guarantee) ──
+  // ── Compute Collision-Free Docking Coordinates (Strict Mathematical Zero-Overlap Guarantee) ──
   let cardStyle = {
     position: 'fixed',
     zIndex: 9999,
@@ -316,59 +427,58 @@ export default function InteractiveDemoTour() {
 
   if (targetRect) {
     if (computedSide === 'bottom') {
-      if (spaceBottom >= 280) {
-        cardStyle.top = `${bottom + 10}px`;
-        cardStyle.bottom = 'auto';
-        cardStyle.maxHeight = `${vh - bottom - 18}px`; // Mathematically impossible to overflow bottom
-      } else {
-        // Anchor to bottom of screen so footer and buttons are 100% visible
-        cardStyle.bottom = '16px';
-        cardStyle.top = 'auto';
-        cardStyle.maxHeight = `${Math.min(520, vh - 32)}px`;
-      }
-      const desiredLeft = Math.max(16, Math.min(left, vw - CARD_WIDTH - 16));
+      // Strictly outside and beneath target spotlight box: bottom + 12px
+      cardStyle.top = `${bottom + 12}px`;
+      cardStyle.bottom = 'auto';
+      const availableH = Math.max(180, vh - bottom - 24);
+      cardStyle.maxHeight = `${availableH}px`;
+      const desiredLeft = Math.max(16, Math.min(left, vw - CARD_WIDTH - 20));
       cardStyle.left = `${desiredLeft}px`;
       cardStyle.right = 'auto';
 
     } else if (computedSide === 'top') {
-      if (spaceTop >= 280) {
-        cardStyle.bottom = `${vh - top + 10}px`;
-        cardStyle.top = 'auto';
-        cardStyle.maxHeight = `${top - 18}px`; // Mathematically impossible to overflow top
-      } else {
-        cardStyle.top = '16px';
-        cardStyle.bottom = 'auto';
-        cardStyle.maxHeight = `${Math.min(520, vh - 32)}px`;
-      }
-      const desiredLeft = Math.max(16, Math.min(left, vw - CARD_WIDTH - 16));
+      // Strictly outside and above target spotlight box: top - 12px
+      cardStyle.bottom = `${vh - top + 12}px`;
+      cardStyle.top = 'auto';
+      const availableH = Math.max(180, top - 24);
+      cardStyle.maxHeight = `${availableH}px`;
+      const desiredLeft = Math.max(16, Math.min(left, vw - CARD_WIDTH - 20));
       cardStyle.left = `${desiredLeft}px`;
       cardStyle.right = 'auto';
 
     } else if (computedSide === 'right') {
-      cardStyle.right = '16px';
-      cardStyle.left = 'auto';
-      const maxCardH = Math.min(560, vh - 32);
-      const idealTop = Math.max(16, Math.min(top, vh - maxCardH - 16));
+      // Strictly to the right of target spotlight box: right + 12px
+      cardStyle.left = `${right + 12}px`;
+      cardStyle.right = 'auto';
+      const availableW = Math.max(280, Math.min(CARD_WIDTH, vw - right - 24));
+      cardStyle.width = `${availableW}px`;
+      cardStyle.maxWidth = `${availableW}px`;
+      const maxCardH = Math.min(560, vh - 96);
+      const idealTop = Math.max(78, Math.min(top, vh - maxCardH - 16));
       cardStyle.top = `${idealTop}px`;
       cardStyle.bottom = 'auto';
       cardStyle.maxHeight = `${vh - idealTop - 16}px`;
 
     } else { // 'left'
-      cardStyle.left = '16px';
-      cardStyle.right = 'auto';
-      const maxCardH = Math.min(560, vh - 32);
-      const idealTop = Math.max(16, Math.min(top, vh - maxCardH - 16));
+      // Strictly to the left of target spotlight box: left - 12px
+      cardStyle.right = `${vw - left + 12}px`;
+      cardStyle.left = 'auto';
+      const availableW = Math.max(280, Math.min(CARD_WIDTH, left - 24));
+      cardStyle.width = `${availableW}px`;
+      cardStyle.maxWidth = `${availableW}px`;
+      const maxCardH = Math.min(560, vh - 96);
+      const idealTop = Math.max(78, Math.min(top, vh - maxCardH - 16));
       cardStyle.top = `${idealTop}px`;
       cardStyle.bottom = 'auto';
       cardStyle.maxHeight = `${vh - idealTop - 16}px`;
     }
   } else {
     // Fallback if element not rendered yet
-    cardStyle.right = '16px';
+    cardStyle.right = '24px';
     cardStyle.left = 'auto';
-    cardStyle.top = '72px';
+    cardStyle.top = '76px';
     cardStyle.bottom = 'auto';
-    cardStyle.maxHeight = `${vh - 90}px`;
+    cardStyle.maxHeight = `${vh - 96}px`;
   }
 
   return (
@@ -440,7 +550,7 @@ export default function InteractiveDemoTour() {
             }}
           />
 
-          {/* ── Illuminated Glowing Pulse Border around spotlighted element ── */}
+          {/* ── Illuminated Glowing Pulse Border — pulses brighter while voice is playing ── */}
           <div
             style={{
               position: 'fixed',
@@ -448,33 +558,49 @@ export default function InteractiveDemoTour() {
               left: `${left}px`,
               width: `${width}px`,
               height: `${height}px`,
-              border: '2.5px solid #F59E0B',
+              border: isSpeaking ? '2.5px solid #0D9488' : '2.5px solid #F59E0B',
               borderRadius: '14px',
-              boxShadow: '0 0 0 3px rgba(245, 158, 11, 0.25), 0 0 35px rgba(245, 158, 11, 0.6), inset 0 0 20px rgba(245, 158, 11, 0.1)',
+              boxShadow: isSpeaking
+                ? '0 0 0 4px rgba(13, 148, 136, 0.3), 0 0 45px rgba(13, 148, 136, 0.7), inset 0 0 24px rgba(13, 148, 136, 0.12)'
+                : '0 0 0 3px rgba(245, 158, 11, 0.25), 0 0 35px rgba(245, 158, 11, 0.6), inset 0 0 20px rgba(245, 158, 11, 0.1)',
               zIndex: 9992,
               pointerEvents: 'none',
-              transition: 'all 0.25s ease-out'
+              transition: 'all 0.3s ease-out'
             }}
           >
-            {/* Live Interactive Focus Pill */}
+            {/* Focus pill — shows voice status when playing, spotlight label otherwise */}
             <div style={{
               position: 'absolute',
-              top: '-14px',
+              top: '-16px',
               left: '16px',
-              background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+              background: isSpeaking
+                ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
+                : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
               color: '#FFFFFF',
               padding: '3px 10px',
               borderRadius: '999px',
               fontSize: '0.68rem',
               fontWeight: 800,
-              letterSpacing: '0.06em',
+              letterSpacing: '0.05em',
               display: 'flex',
               alignItems: 'center',
-              gap: 5,
-              boxShadow: '0 2px 10px rgba(245, 158, 11, 0.5)'
+              gap: 6,
+              boxShadow: isSpeaking
+                ? '0 2px 10px rgba(13, 148, 136, 0.6)'
+                : '0 2px 10px rgba(245, 158, 11, 0.5)',
+              transition: 'background 0.3s ease'
             }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFFFFF', animation: 'ping 1.2s infinite' }} />
-              <span>LIVE SPOTLIGHT · FULLY INTERACTIVE</span>
+              {isSpeaking ? (
+                <>
+                  <SoundWave active={true} />
+                  <span>NARRATING</span>
+                </>
+              ) : (
+                <>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFFFFF', animation: 'ping 1.2s infinite' }} />
+                  <span>LIVE SPOTLIGHT · INTERACTIVE</span>
+                </>
+              )}
             </div>
           </div>
         </>
@@ -496,9 +622,9 @@ export default function InteractiveDemoTour() {
           overflow: 'hidden',
           boxSizing: 'border-box',
         }}>
-          {/* ── 1. Fixed Card Header (NEVER scrolls away!) ── */}
+          {/* ── 1. Fixed Card Header ── */}
           <div style={{
-            padding: '13px 18px 9px',
+            padding: '12px 18px 9px',
             borderBottom: '1px solid var(--border-subtle)',
             flexShrink: 0,
             background: '#FFFFFF',
@@ -522,37 +648,68 @@ export default function InteractiveDemoTour() {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                {/* Flip Side Button */}
+                {/* Voice: Replay */}
+                <button
+                  type="button"
+                  onClick={replay}
+                  title="Replay narration"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--navy)', padding: 3, display: 'flex',
+                    alignItems: 'center', borderRadius: 6
+                  }}
+                >
+                  <RotateCcw size={13} />
+                </button>
+
+                {/* Voice: Play/Pause */}
+                <button
+                  type="button"
+                  onClick={togglePause}
+                  title={isPlaying ? 'Pause narration' : 'Play narration'}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: isPlaying ? '#0D9488' : 'var(--navy)', padding: 3,
+                    display: 'flex', alignItems: 'center', borderRadius: 6
+                  }}
+                >
+                  {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+                </button>
+
+                {/* Voice: Mute */}
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  title={isMuted ? 'Unmute narration' : 'Mute narration'}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: isMuted ? '#EF4444' : 'var(--navy)', padding: 3,
+                    display: 'flex', alignItems: 'center', borderRadius: 6
+                  }}
+                >
+                  {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                </button>
+
+                {/* Flip Side */}
                 <button
                   type="button"
                   onClick={flipSide}
                   className="btn btn-ghost btn-sm"
-                  style={{
-                    fontSize: '0.7rem',
-                    padding: '2px 7px',
-                    borderRadius: 6,
-                    gap: 3,
-                    color: 'var(--navy)'
-                  }}
-                  title={lang === 'hi' ? 'कार्ड की स्थिति बदलें (F)' : 'Flip card docking position (F)'}
+                  style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: 6, gap: 3, color: 'var(--navy)' }}
+                  title="Flip card docking position (F)"
                 >
                   <MoveHorizontal size={12} />
                   <span>{lang === 'hi' ? 'पक्ष' : 'Flip'}</span>
                 </button>
 
-                {/* Close Button */}
+                {/* Close */}
                 <button
                   type="button"
                   onClick={endTour}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--text-muted)',
-                    padding: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderRadius: 6
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--text-muted)', padding: 3,
+                    display: 'flex', alignItems: 'center', borderRadius: 6
                   }}
                   title="Exit Demo Tour (Esc)"
                 >
@@ -561,16 +718,20 @@ export default function InteractiveDemoTour() {
               </div>
             </div>
 
-            {/* Title */}
-            <h3 style={{
-              margin: 0,
-              fontSize: '1.08rem',
-              fontWeight: 800,
-              color: 'var(--navy)',
-              lineHeight: 1.25
-            }}>
-              {currentStep.title[lang] || currentStep.title.en}
-            </h3>
+            {/* Title row with animated sound wave */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: '1.05rem',
+                fontWeight: 800,
+                color: 'var(--navy)',
+                lineHeight: 1.25,
+                flex: 1
+              }}>
+                {currentStep.title[lang] || currentStep.title.en}
+              </h3>
+              <SoundWave active={isSpeaking && !isMuted} />
+            </div>
           </div>
 
           {/* ── 2. Scrollable Body with Slim Scrollbar ── */}

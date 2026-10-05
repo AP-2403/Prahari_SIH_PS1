@@ -189,6 +189,22 @@ def _aggregate_works(works: list[Work]) -> DashboardStats:
         chart_trend_monthly=trend_monthly,
     )
 
+@router.get("/meta/geo")
+def get_geo_list(db: Session = Depends(get_db)):
+    states = [
+        r[0] for r in db.query(Work.state).distinct()
+        .filter(Work.state.isnot(None), func.length(Work.state) > 1)
+        .order_by(Work.state).all()
+        if r[0]
+    ]
+    districts = [
+        r[0] for r in db.query(Work.constituency).distinct()
+        .filter(Work.constituency.isnot(None), func.length(Work.constituency) > 1)
+        .order_by(Work.constituency).all()
+        if r[0]
+    ]
+    return {"states": states, "districts": districts}
+
 
 @router.get("/{role}", response_model=DashboardStats)
 def get_dashboard(
@@ -203,13 +219,18 @@ def get_dashboard(
     effective_role = role.lower()
 
     if current_user.role == "mp_user":
-        # Force scope to their MP regardless of requested role
-        if current_user.linked_mp_id:
-            q = q.filter(Work.mp_id == current_user.linked_mp_id)
+        target_mp = id if id else current_user.linked_mp_id
+        if target_mp:
+            try:
+                q = q.filter(Work.mp_id == int(target_mp))
+            except ValueError:
+                if current_user.linked_mp_id:
+                    q = q.filter(Work.mp_id == current_user.linked_mp_id)
         effective_role = "mp"
     elif current_user.role == "district_user":
-        if current_user.linked_constituency:
-            q = q.filter(Work.constituency == current_user.linked_constituency)
+        target_dist = id if id else current_user.linked_constituency
+        if target_dist:
+            q = q.filter(Work.constituency.ilike(f"%{target_dist}%"))
         effective_role = "district"
     else:
         # Admin can filter by role parameter

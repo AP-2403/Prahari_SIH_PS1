@@ -60,6 +60,7 @@ export const works = {
 
 export const dashboard = {
   get: (role, id) => api.get(`/dashboard/${role}`, { params: id ? { id } : {} }),
+  getGeo: () => api.get('/dashboard/meta/geo'),
 };
 
 export const engines = {

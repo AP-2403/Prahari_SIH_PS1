@@ -70,7 +70,7 @@ export default function Assistant() {
 
   return (
     <Layout>
-      <div id="tour-assistant-panel" data-tour="assistant-panel" style={{ maxWidth: 800 }}>
+      <div id="tour-assistant-panel" data-tour="assistant-panel" style={{ maxWidth: 740 }}>
         <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: 'var(--navy)' }}>

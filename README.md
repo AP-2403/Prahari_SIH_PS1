@@ -22,28 +22,37 @@
 
 ## 📽️ Project Demonstration Video
 
-<!-- ======================================================== -->
-<!-- DEMO VIDEO PLACEHOLDER SECTION - INSERT VIDEO LINK BELOW -->
-<!-- ======================================================== -->
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=T7u08LQ5FBo" target="_blank" rel="noopener noreferrer">
+    <img src="https://i.ytimg.com/vi/T7u08LQ5FBo/hqdefault.jpg" alt="PRAHARI SIH 2026 Project Demonstration Video" width="100%" style="max-width: 820px; border-radius: 14px; box-shadow: 0 12px 36px rgba(0,0,0,0.35); border: 2px solid #0D9488;" />
+  </a>
 
-```
-╔══════════════════════════════════════════════════════════════════════════════════════╗
-║                                                                                      ║
-║                      🎬 [ DEMO VIDEO WALKTHROUGH PLACEHOLDER ]                       ║
-║                                                                                      ║
-║   Watch the complete 19-stage interactive end-to-end audit demonstration:            ║
-║   • MoSPI DPR file ingestion & live multi-engine screening pipeline                  ║
-║   • National Macro-Telemetry, Leaflet geospatial heatmap & radar charts              ║
-║   • Multimodal EXIF/pHash photo audit & statutory 1-year guideline deadline          ║
-║   • Explainable SHAP irregular factor attribution with rule citations               ║
-║   • Interactive Louvain network cartel graph & citizen whistleblower social audit    ║
-║                                                                                      ║
-║   👉 Link: [INSERT_YOUTUBE_OR_LOOM_DEMO_VIDEO_URL_HERE]                              ║
-║                                                                                      ║
-╚══════════════════════════════════════════════════════════════════════════════════════╝
-```
+  <br /><br />
 
-> **Note:** Video walkthrough link and preview will be linked directly above prior to final evaluation.
+  <p>
+    <a href="https://www.youtube.com/watch?v=T7u08LQ5FBo" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/badge/YouTube-Watch%20Demo%20Video-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://praharisihps1.vercel.app/ministry" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/badge/Live%20App-Interactive%20Tour-0D9488?style=for-the-badge&logo=vercel" alt="Launch Live Tour" />
+    </a>
+  </p>
+
+  <p><em>▶️ <strong>Click the video thumbnail above to watch the complete walkthrough on YouTube</strong> (Direct Link: <a href="https://youtu.be/T7u08LQ5FBo"><strong>https://youtu.be/T7u08LQ5FBo</strong></a>)</em></p>
+</div>
+
+### ⏱️ Video Walkthrough Breakdown
+| Timestamp | Demonstration Stage | Core Capabilities Highlighted |
+|:---:|:---|:---|
+| **0:00** | **MoSPI DPR Ingestion** | Batch CSV/XLSX file ingestion, schema auto-mapping & Para 3.3 SC/ST statutory checks |
+| **0:45** | **National Surveillance Hub** | Nationwide macro-telemetry, ₹71.8B fund velocity & 774 MP operational health |
+| **1:30** | **Geospatial Risk Heatmap** | Survey of India GIS boundary clustering, split tenders & off-site ghost projects |
+| **2:15** | **Multimodal Progress Audit** | Geodesic EXIF anti-spoofing, pHash image duplicate checks & 1-year timeline audit |
+| **3:00** | **Explainable AI (SHAP Reasoning)** | Local factor attribution mapped directly to statutory MoSPI audit clauses |
+| **3:45** | **Contractor Cartel Network Graph** | Louvain community detection exposing bidding rings & >30% monopoly clusters |
+| **4:30** | **AI Assistant & Text-to-SQL** | Context-grounded RAG chatbot & natural-language SQL queries against live data |
+| **5:10** | **Citizen Transparency Portal** | Public QR-code verification, inspection badges & vigilance whistleblower reporting |
 
 ---
 
