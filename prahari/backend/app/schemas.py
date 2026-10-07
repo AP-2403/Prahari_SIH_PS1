@@ -199,8 +199,14 @@ class FeedbackIn(BaseModel):
 
 
 # ── Assistant ─────────────────────────────────────────────────────────────────
+class ChatHistoryItem(BaseModel):
+    role: str
+    text: str
+
+
 class ChatMessage(BaseModel):
     message: str
+    history: Optional[list[ChatHistoryItem]] = None
     mp_scope_id: Optional[int] = None
     api_key: Optional[str] = None
 

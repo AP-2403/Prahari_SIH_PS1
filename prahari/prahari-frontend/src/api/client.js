@@ -85,7 +85,7 @@ export const upload = {
 };
 
 export const assistant = {
-  chat: (message, mp_scope_id) => api.post('/assistant/chat', { message, mp_scope_id }),
+  chat: (message, mp_scope_id, history) => api.post('/assistant/chat', { message, mp_scope_id, history }),
   query: (message, mp_scope_id) => api.post('/assistant/query', { message, mp_scope_id }),
 };
 

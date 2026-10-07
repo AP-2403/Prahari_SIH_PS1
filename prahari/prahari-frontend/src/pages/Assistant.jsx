@@ -57,6 +57,15 @@ export default function Assistant() {
     setLoading(true);
     setSqlResult(null);
 
+    // Extract recent conversation turns for conversational memory
+    const history = messages
+      .filter((m) => m.text && !m.text.startsWith('⚠️'))
+      .slice(-6)
+      .map((m) => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        text: m.text,
+      }));
+
     try {
       if (mode === 'sql') {
         const res = await assistantApi.query(userMsg);
@@ -67,7 +76,7 @@ export default function Assistant() {
           text: `✅ ${lang === 'hi' ? 'क्वेरी निष्पादित' : 'Query executed'} — ${row_count} ${lang === 'hi' ? 'पंक्तियां प्राप्त हुईं' : 'rows returned'}.\n\`\`\`sql\n${sql}\n\`\`\``,
         }]);
       } else {
-        const res = await assistantApi.chat(userMsg);
+        const res = await assistantApi.chat(userMsg, null, history);
         setMessages((m) => [...m, { role: 'ai', text: res.data.response, source: res.data.source }]);
       }
     } catch (err) {

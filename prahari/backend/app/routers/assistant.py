@@ -61,8 +61,8 @@ def _resolve_llm_service():
     return "none", None
 
 
-def _call_gemini(system_prompt: str, user_message: str, api_key: str) -> str:
-    """Call Google Gemini generateContent endpoint via standard library urllib with candidate fallback."""
+def _call_gemini(system_prompt: str, user_message: str, api_key: str, history: list[dict] | None = None) -> str:
+    """Call Google Gemini generateContent endpoint via standard library urllib with multi-turn history and candidate fallback."""
     candidate_models = [
         "models/gemini-flash-lite-latest",
         "models/gemini-3-flash-preview",
@@ -70,14 +70,35 @@ def _call_gemini(system_prompt: str, user_message: str, api_key: str) -> str:
         "models/gemini-1.5-flash",
         "gemini-1.5-flash"
     ]
+
+    contents = []
+    # Add previous chat history turns if provided
+    if history:
+        for turn in history[-8:]:
+            r = "user" if turn.get("role") in ["user", "human"] else "model"
+            txt = (turn.get("text") or "").strip()
+            if txt:
+                if contents and contents[-1]["role"] == r:
+                    contents[-1]["parts"][0]["text"] += f"\n{txt}"
+                else:
+                    contents.append({"role": r, "parts": [{"text": txt}]})
+
+    # Add current user message turn
+    if contents and contents[-1]["role"] == "user":
+        contents[-1]["parts"][0]["text"] += f"\n{user_message}"
+    else:
+        contents.append({"role": "user", "parts": [{"text": user_message}]})
+
+    # Inject system instruction into the first user turn for full context
+    if contents and contents[0]["role"] == "user":
+        orig_first = contents[0]["parts"][0]["text"]
+        contents[0]["parts"][0]["text"] = f"[SYSTEM INSTRUCTION: {system_prompt}]\n\n{orig_first}"
+    else:
+        contents.insert(0, {"role": "user", "parts": [{"text": f"[SYSTEM INSTRUCTION: {system_prompt}]\n\nHello."}]})
+        contents.insert(1, {"role": "model", "parts": [{"text": "Hello! I am PRAHARI audit assistant."}]})
+
     payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": f"{system_prompt}\n\nUser Question/Instruction:\n{user_message}"}
-                ]
-            }
-        ],
+        "contents": contents,
         "generationConfig": {
             "temperature": 0.2,
             "maxOutputTokens": 1024
@@ -134,7 +155,7 @@ Key MPLADS rules to remember:
 - Ineligible categories: land acquisition, religious structures, private property
 - All works must be within the constituency (Lok Sabha) or state (Rajya Sabha)
 
-Answer questions helpfully and factually. Support both English and Hindi questions naturally. Cite specific guideline clauses where relevant.
+Answer questions helpfully, concisely, and factually. Support follow-up questions naturally based on conversation history. Support both English and Hindi questions naturally. Cite specific guideline clauses where relevant.
 """
 
 SYSTEM_PROMPT_SQL = f"""You are a SQL query generator for PRAHARI's SQLite database. 
@@ -203,6 +224,12 @@ async def chat(req: ChatMessage, db: Session = Depends(get_db), current_user: Us
         mp_id = req.mp_scope_id or current_user.linked_mp_id
         scope_note = f"\n[User scope: MP ID {mp_id} — only discuss works related to this MP]"
 
+    # Prepare history list
+    history_dicts = []
+    if req.history:
+        for item in req.history:
+            history_dicts.append({"role": item.role, "text": item.text})
+
     # If Gemini key exists in env, test if it is usable
     if provider == "gemini":
         try:
@@ -210,6 +237,7 @@ async def chat(req: ChatMessage, db: Session = Depends(get_db), current_user: Us
                 system_prompt=SYSTEM_PROMPT_CHAT + scope_note,
                 user_message=req.message,
                 api_key=key,
+                history=history_dicts,
             )
             if reply:
                 return ChatResponse(response=reply, source="gemini")
@@ -220,11 +248,26 @@ async def chat(req: ChatMessage, db: Session = Depends(get_db), current_user: Us
         client = _get_claude_client()
         if client:
             try:
+                claude_messages = []
+                for turn in history_dicts[-6:]:
+                    r = "user" if turn.get("role") in ["user", "human"] else "assistant"
+                    txt = (turn.get("text") or "").strip()
+                    if txt:
+                        if claude_messages and claude_messages[-1]["role"] == r:
+                            claude_messages[-1]["content"] += f"\n{txt}"
+                        else:
+                            claude_messages.append({"role": r, "content": txt})
+
+                if claude_messages and claude_messages[-1]["role"] == "user":
+                    claude_messages[-1]["content"] += f"\n{req.message}"
+                else:
+                    claude_messages.append({"role": "user", "content": req.message})
+
                 response = client.messages.create(
                     model="claude-3-5-haiku-20241022",
                     max_tokens=1024,
                     system=SYSTEM_PROMPT_CHAT + scope_note,
-                    messages=[{"role": "user", "content": req.message}],
+                    messages=claude_messages,
                 )
                 if response.content and response.content[0].text:
                     return ChatResponse(response=response.content[0].text, source="claude")
