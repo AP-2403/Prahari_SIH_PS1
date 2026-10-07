@@ -202,6 +202,7 @@ class FeedbackIn(BaseModel):
 class ChatMessage(BaseModel):
     message: str
     mp_scope_id: Optional[int] = None
+    api_key: Optional[str] = None
 
 
 class ChatResponse(BaseModel):
@@ -212,6 +213,7 @@ class ChatResponse(BaseModel):
 class QueryRequest(BaseModel):
     message: str
     mp_scope_id: Optional[int] = None
+    api_key: Optional[str] = None
 
 
 class QueryResponse(BaseModel):
