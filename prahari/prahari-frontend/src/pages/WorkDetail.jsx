@@ -11,8 +11,10 @@ import Layout from '../components/Layout';
 import RiskBadge from '../components/RiskBadge';
 import ShapReasonCard from '../components/ShapReasonCard';
 import { works as worksApi, feedback as feedbackApi } from '../api/client';
+import { useLanguage, translateStatus, translateCategory } from '../context/LanguageContext';
 
 export default function WorkDetail() {
+  const { lang, t } = useLanguage();
   const { id } = useParams();
   const navigate = useNavigate();
   const [work, setWork] = useState(null);
@@ -107,17 +109,18 @@ export default function WorkDetail() {
     setValidationResult(null);
 
     // Simulated scanning steps for realistic AI auditor feedback
-    setValidationStep('📡 Step 1/4: Parsing EXIF metadata, camera device hash & GPS geotag...');
+    setValidationStep(t('step_1_metadata', '📡 Step 1/4: Parsing EXIF metadata, camera device hash & GPS geotag...'));
     await new Promise((r) => setTimeout(r, 600));
 
-    setValidationStep('🧠 Step 2/4: Computing Perceptual Hash (pHash) against 59,000+ national works...');
+    setValidationStep(t('step_2_phash', '🧠 Step 2/4: Computing Perceptual Hash (pHash) against 59,000+ national works...'));
     await new Promise((r) => setTimeout(r, 700));
 
-    setValidationStep('📐 Step 3/4: OpenCV Canny Edge & Structural Similarity (SSIM) physical change check...');
+    setValidationStep(t('step_3_opencv', '📐 Step 3/4: OpenCV Canny Edge & Structural Similarity (SSIM) physical change check...'));
     await new Promise((r) => setTimeout(r, 700));
 
-    setValidationStep('⚖️ Step 4/4: Evaluating MPLADS Guideline §7.4 1-Year statutory completion deadline...');
+    setValidationStep(t('step_4_deadline', '⚖️ Step 4/4: Evaluating MPLADS Guideline §7.4 1-Year statutory completion deadline...'));
     await new Promise((r) => setTimeout(r, 500));
+
 
     // Determine simulation coordinates
     let overrideLat = null;
@@ -219,7 +222,7 @@ export default function WorkDetail() {
       <div style={{ maxWidth: 960 }}>
         {/* Back navigation */}
         <button className="btn btn-ghost btn-sm" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-          <ArrowLeft size={14} /> Back to Works
+          <ArrowLeft size={14} /> {t('back_to_works', 'Back to Works')}
         </button>
 
         {/* ─── Header Card ──────────────────────────────────────────────── */}
@@ -227,13 +230,13 @@ export default function WorkDetail() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 6 }}>
-                <span>Work ID: <strong>{work.work_id_source}</strong></span>
+                <span>{t('work_id', 'Work ID')}: <strong>{work.work_id_source}</strong></span>
                 <span>·</span>
                 <span className={`risk-badge ${isCompleted ? 'risk-low' : 'risk-medium'}`}>
-                  {isCompleted ? '✓ Completed' : '⏳ In Progress'}
+                  {isCompleted ? `✓ ${t('status_completed', 'Completed')}` : `⏳ ${t('status_in_progress', 'In Progress')}`}
                 </span>
                 <span>·</span>
-                <span>Category: {work.category}</span>
+                <span>{t('category', 'Category')}: {translateCategory(work.category, lang)}</span>
               </div>
               <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--navy)', lineHeight: 1.4 }}>
                 {work.title}
@@ -241,11 +244,11 @@ export default function WorkDetail() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 10, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                 <span>📍 <strong>{work.constituency}</strong>, {work.state}</span>
                 <span>🏛️ {work.mp_name || 'MP Representative'}</span>
-                <span>🏗️ Agency: {work.implementing_agency || 'District Implementing Agency'}</span>
+                <span>🏗️ {t('agency', 'Agency')}: {work.implementing_agency || 'District Implementing Agency'}</span>
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 4 }}>Anomaly Risk Score</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 4 }}>{t('anomaly_risk_score', 'Anomaly Risk Score')}</div>
               <RiskBadge score={rs?.score_0_100} />
             </div>
           </div>
@@ -253,14 +256,14 @@ export default function WorkDetail() {
           {/* Fund stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 18 }}>
             {[
-              { label: 'Sanctioned Amount', value: `₹${((work.sanctioned_amount || 0) / 1e5).toFixed(1)} Lakh` },
-              { label: 'Expenditure Spent', value: `₹${(((isCompleted ? (work.final_amount || work.sanctioned_amount) : work.final_amount) || 0) / 1e5).toFixed(1)} Lakh` },
+              { label: t('sanctioned_amount', 'Sanctioned Amount'), value: `₹${((work.sanctioned_amount || 0) / 1e5).toFixed(1)} ${t('lakh', 'Lakh')}` },
+              { label: t('expenditure_spent', 'Expenditure Spent'), value: `₹${(((isCompleted ? (work.final_amount || work.sanctioned_amount) : work.final_amount) || 0) / 1e5).toFixed(1)} ${t('lakh', 'Lakh')}` },
               {
-                label: 'Statutory Deadline',
-                value: deadlineDate ? deadlineDate.toLocaleDateString('en-IN') : '1 Year Post-Sanction',
-                sub: isOverdue ? `⚠️ Overdue by ${daysOverdue} days` : '✓ Within 1-Year Limit'
+                label: t('statutory_deadline', 'Statutory Deadline'),
+                value: deadlineDate ? deadlineDate.toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN') : t('one_year_post_sanction', '1 Year Post-Sanction'),
+                sub: isOverdue ? `${t('overdue_by', '⚠️ Overdue by')} ${daysOverdue} ${t('days', 'days')}` : t('within_one_year', '✓ Within 1-Year Limit')
               },
-              { label: 'Citizen Rating', value: work.avg_rating ? `${work.avg_rating} / 5.0` : '4.5 / 5.0' },
+              { label: t('citizen_rating', 'Citizen Rating'), value: work.avg_rating ? `${work.avg_rating} / 5.0` : '4.5 / 5.0' },
             ].map((item) => (
               <div key={item.label} style={{ padding: '12px', background: 'var(--surface-2)', borderRadius: 8 }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.label}</div>
@@ -280,10 +283,10 @@ export default function WorkDetail() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div>
               <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--navy)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Multimodal Verification Engine (§9)
+                {t('multimodal_engine_title', 'Multimodal Verification Engine (§9)')}
               </span>
               <h3 style={{ margin: '4px 0 0', fontSize: '1.1rem', fontWeight: 800, color: 'var(--navy)' }}>
-                Field Project Progress & Photographic Audit
+                {t('field_project_audit', 'Field Project Progress & Photographic Audit')}
               </h3>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -299,7 +302,7 @@ export default function WorkDetail() {
                 gap: 4
               }}>
                 {isCompleted ? <CheckCircle size={14} /> : <Clock size={14} />}
-                {isCompleted ? 'COMPLETED (100%)' : `IN PROGRESS (${currentProgress}%)`}
+                {isCompleted ? t('completed_100', 'COMPLETED (100%)') : `${t('in_progress_pct', 'IN PROGRESS')} (${currentProgress}%)`}
               </span>
             </div>
           </div>
@@ -307,8 +310,8 @@ export default function WorkDetail() {
           {/* Interactive Progress Bar */}
           <div style={{ margin: '14px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, marginBottom: 6 }}>
-              <span>Verified Physical Completion</span>
-              <span style={{ color: isCompleted ? 'var(--green-clean)' : 'var(--navy)' }}>{currentProgress}% Completed</span>
+              <span>{t('verified_physical_completion', 'Verified Physical Completion')}</span>
+              <span style={{ color: isCompleted ? 'var(--green-clean)' : 'var(--navy)' }}>{currentProgress}% {t('completed_tag', 'Completed')}</span>
             </div>
             <div style={{ width: '100%', height: 14, background: 'var(--border-subtle)', borderRadius: 999, overflow: 'hidden' }}>
               <div
@@ -328,16 +331,16 @@ export default function WorkDetail() {
           {/* Milestone markers */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: 16 }}>
             <div style={{ fontWeight: currentProgress >= 25 ? 700 : 400, color: currentProgress >= 25 ? '#16A34A' : 'inherit' }}>
-              {currentProgress >= 25 ? '✓' : '○'} 25% Baseline / Earthwork
+              {currentProgress >= 25 ? '✓' : '○'} 25% {t('baseline_earthwork', 'Baseline / Earthwork')}
             </div>
             <div style={{ fontWeight: currentProgress >= 50 ? 700 : 400, color: currentProgress >= 50 ? '#16A34A' : 'inherit' }}>
-              {currentProgress >= 50 ? '✓' : '○'} 50% Foundation & Grading
+              {currentProgress >= 50 ? '✓' : '○'} 50% {t('foundation_grading', 'Foundation & Grading')}
             </div>
             <div style={{ fontWeight: currentProgress >= 75 ? 700 : 400, color: currentProgress >= 75 ? '#16A34A' : 'inherit' }}>
-              {currentProgress >= 75 ? '✓' : '○'} 75% Superstructure / Layering
+              {currentProgress >= 75 ? '✓' : '○'} 75% {t('superstructure_layering', 'Superstructure / Layering')}
             </div>
             <div style={{ fontWeight: currentProgress >= 100 ? 700 : 400, color: currentProgress >= 100 ? '#16A34A' : 'inherit' }}>
-              {currentProgress >= 100 ? '✓' : '○'} 100% Final Handover & Signoff
+              {currentProgress >= 100 ? '✓' : '○'} 100% {t('final_handover', 'Final Handover & Signoff')}
             </div>
           </div>
 
@@ -358,20 +361,21 @@ export default function WorkDetail() {
                   <Check size={18} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, color: '#166534', fontSize: '0.9rem' }}>Project Formally Ticked Off & Completed</div>
+                  <div style={{ fontWeight: 700, color: '#166534', fontSize: '0.9rem' }}>{t('ticked_off_title', 'Project Formally Ticked Off & Completed')}</div>
                   <div style={{ fontSize: '0.75rem', color: '#15803D' }}>
-                    Multimodal validation confirmed 100% completion with geotag verification and structural audit.
+                    {t('ticked_off_desc', 'Multimodal validation confirmed 100% completion with geotag verification and structural audit.')}
                   </div>
                 </div>
               </div>
-              <span className="risk-badge risk-low" style={{ fontSize: '0.75rem' }}>Closed from Pending List</span>
+              <span className="risk-badge risk-low" style={{ fontSize: '0.75rem' }}>{t('closed_from_pending', 'Closed from Pending List')}</span>
             </div>
           )}
+
 
           {/* Action Trigger */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid #F1F5F9' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Submit geotagged photos or site evidence to advance milestone or conclude work.
+              {t('submit_progress_prompt', 'Submit geotagged photos or site evidence to advance milestone or conclude work.')}
             </div>
             <button
               id="tour-open-upload-btn"
@@ -381,7 +385,7 @@ export default function WorkDetail() {
               style={{ display: 'flex', alignItems: 'center', gap: 6 }}
             >
               <Camera size={14} />
-              {showUploadForm ? 'Close Upload Form' : 'Submit Progress Update & Geotag Photo'}
+              {showUploadForm ? t('close_upload_form', 'Close Upload Form') : t('submit_progress_btn', 'Submit Progress Update & Geotag Photo')}
             </button>
           </div>
 
@@ -396,20 +400,20 @@ export default function WorkDetail() {
             }}>
               <div style={{ fontWeight: 700, color: 'var(--navy)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Sparkles size={16} color="#F59E0B" />
-                Submit New Progress Evidence (Photos / Videos / Geotags)
+                {t('submit_new_evidence', 'Submit New Progress Evidence (Photos / Videos / Geotags)')}
               </div>
 
               <form onSubmit={handleProgressVerification}>
                 {/* Milestone picker */}
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--navy)', marginBottom: 6 }}>
-                    Select Target Progress Milestone:
+                    {t('select_target_milestone', 'Select Target Progress Milestone:')}
                   </label>
                   <div style={{ display: 'flex', gap: 10 }}>
                     {[
-                      { pct: 50, label: '50% (Foundation & Grading)' },
-                      { pct: 75, label: '75% (Surfacing & Pillars)' },
-                      { pct: 100, label: '100% (Full Project Completion)' },
+                      { pct: 50, label: t('foundation_grading_opt', '50% (Foundation & Grading)') },
+                      { pct: 75, label: t('surfacing_pillars_opt', '75% (Surfacing & Pillars)') },
+                      { pct: 100, label: t('full_completion_opt', '100% (Full Project Completion)') },
                     ].map((m) => (
                       <button
                         key={m.pct}
@@ -438,7 +442,7 @@ export default function WorkDetail() {
                 {/* Photo selection / Quick Sample buttons */}
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--navy)', marginBottom: 6 }}>
-                    Site Photo / Video Evidence:
+                    {t('site_photo_evidence', 'Site Photo / Video Evidence:')}
                   </label>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                     <input
@@ -453,7 +457,7 @@ export default function WorkDetail() {
                       }}
                       style={{ fontSize: '0.8rem' }}
                     />
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>— OR DEMO WITH ONE CLICK: —</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('or_demo_one_click', '— OR DEMO WITH ONE CLICK: —')}</span>
                     <button
                       id="tour-load-sample-btn"
                       data-tour="load-sample-btn"
@@ -462,7 +466,7 @@ export default function WorkDetail() {
                       style={{ border: '1px solid #CBD5E1', background: '#FFFFFF' }}
                       onClick={() => loadSamplePhoto('after')}
                     >
-                      📸 Load Sample Completed Road Photo
+                      {t('load_sample_photo', '📸 Load Sample Completed Road Photo')}
                     </button>
                   </div>
                 </div>
@@ -476,8 +480,8 @@ export default function WorkDetail() {
                       style={{ width: 140, height: 90, objectFit: 'cover', borderRadius: 8, border: '1px solid #CBD5E1' }}
                     />
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      <div><strong>Active Photo:</strong> {selectedFile ? selectedFile.name : 'Sample Completed Road Asset'}</div>
-                      <div>Resolution: High Definition · EXIF Geotag Enabled</div>
+                      <div><strong>{t('active_photo', 'Active Photo:')}</strong> {selectedFile ? selectedFile.name : t('sample_completed_asset', 'Sample Completed Road Asset')}</div>
+                      <div>{t('resolution_exif_enabled', 'Resolution: High Definition · EXIF Geotag Enabled')}</div>
                     </div>
                   </div>
                 )}
@@ -491,12 +495,12 @@ export default function WorkDetail() {
                   border: '1px solid #FDE68A'
                 }}>
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#92400E', marginBottom: 6 }}>
-                    🎬 Hackathon Demo Geotag Simulation (Choose Scenario for Video):
+                    {t('hackathon_demo_simulation', '🎬 Hackathon Demo Geotag Simulation (Choose Scenario for Video):')}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     {[
-                      { mode: 'site', label: '📍 Genuine Site Geotag (Within 35m of Centroid)', color: '#166534' },
-                      { mode: 'fraud', label: '🚨 Simulated Off-Site Fraud (14.8km away)', color: '#991B1B' },
+                      { mode: 'site', label: t('genuine_site_geotag', '📍 Genuine Site Geotag (Within 35m of Centroid)'), color: '#166534' },
+                      { mode: 'fraud', label: t('simulated_fraud_geotag', '🚨 Simulated Off-Site Fraud (14.8km away)'), color: '#991B1B' },
                     ].map((s) => (
                       <label key={s.mode} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}>
                         <input
@@ -514,14 +518,14 @@ export default function WorkDetail() {
                 {/* Site inspection notes */}
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--navy)', marginBottom: 6 }}>
-                    Site Inspection Remarks:
+                    {t('site_inspection_remarks', 'Site Inspection Remarks:')}
                   </label>
                   <input
                     type="text"
                     className="input"
                     value={siteNotes}
                     onChange={(e) => setSiteNotes(e.target.value)}
-                    placeholder="Enter site engineer remarks..."
+                    placeholder={t('remarks_placeholder', 'Enter site engineer remarks...')}
                   />
                 </div>
 
@@ -537,12 +541,12 @@ export default function WorkDetail() {
                   {validating ? (
                     <>
                       <RotateCw size={16} className="animate-spin" />
-                      Validating with Multimodal AI Engines...
+                      {t('validating_ai', 'Validating with Multimodal AI Engines...')}
                     </>
                   ) : (
                     <>
                       <ShieldCheck size={16} />
-                      Submit & Run Multimodal AI Validation (§9)
+                      {t('submit_and_run_ai', 'Submit & Run Multimodal AI Validation (§9)')}
                     </>
                   )}
                 </button>
@@ -560,7 +564,7 @@ export default function WorkDetail() {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <div style={{ width: 10, height: 10, background: 'var(--accent)', borderRadius: '50%', animation: 'ping 1s infinite' }} />
-                    <strong style={{ color: 'var(--navy)', fontSize: '0.88rem' }}>AI Auditor Active</strong>
+                    <strong style={{ color: 'var(--navy)', fontSize: '0.88rem' }}>{t('ai_auditor_active', 'AI Auditor Active')}</strong>
                   </div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--navy)', fontWeight: 600 }}>
                     {validationStep}
@@ -590,7 +594,7 @@ export default function WorkDetail() {
                       )}
                       <div>
                         <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: validationResult.verdict === 'genuine' ? '#166534' : '#991B1B' }}>
-                          {validationResult.verdict === 'genuine' ? 'Multimodal Validation Succeeded!' : 'Multimodal Validation Flagged Anomaly'}
+                          {validationResult.verdict === 'genuine' ? t('validation_succeeded', 'Multimodal Validation Succeeded!') : t('validation_flagged', 'Multimodal Validation Flagged Anomaly')}
                         </h4>
                         <div style={{ fontSize: '0.78rem', color: validationResult.verdict === 'genuine' ? '#15803D' : '#B91C1C' }}>
                           {validationResult.message}
@@ -605,36 +609,36 @@ export default function WorkDetail() {
                       background: validationResult.verdict === 'genuine' ? '#DCFCE7' : '#FEE2E2',
                       color: validationResult.verdict === 'genuine' ? '#166534' : '#991B1B',
                     }}>
-                      Authenticity: {validationResult.authenticity_score}%
+                      {t('authenticity', 'Authenticity')}: {validationResult.authenticity_score}%
                     </div>
                   </div>
 
                   {/* Subchecks breakdown table */}
                   <div style={{ background: '#FFFFFF', borderRadius: 8, padding: '12px', border: '1px solid #E2E8F0', marginTop: 10 }}>
                     <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                      Engine Inspection Sub-Check Audit
+                      {t('engine_inspection_audit', 'Engine Inspection Sub-Check Audit')}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: '0.75rem' }}>
                       <div>
-                        <strong>📍 Geotag Location:</strong>{' '}
+                        <strong>{t('geotag_location', '📍 Geotag Location:')}</strong>{' '}
                         <span style={{ color: validationResult.subcheck_breakdown?.exif_gps?.verdict?.includes('VERIFIED') ? '#16A34A' : '#DC2626', fontWeight: 600 }}>
                           {validationResult.subcheck_breakdown?.exif_gps?.verdict || 'VERIFIED'}
                         </span>
                       </div>
                       <div>
-                        <strong>👻 Perceptual Hash (pHash):</strong>{' '}
+                        <strong>{t('phash_label', '👻 Perceptual Hash (pHash):')}</strong>{' '}
                         <span style={{ color: '#16A34A', fontWeight: 600 }}>
                           {validationResult.subcheck_breakdown?.reused_photo?.verdict || 'GENUINE (NO REUSE)'}
                         </span>
                       </div>
                       <div>
-                        <strong>📐 Physical Structural Change:</strong>{' '}
+                        <strong>{t('physical_structural_change', '📐 Physical Structural Change:')}</strong>{' '}
                         <span style={{ color: '#16A34A', fontWeight: 600 }}>
                           {validationResult.subcheck_breakdown?.ssim?.verdict || 'PROGRESS CONFIRMED'}
                         </span>
                       </div>
                       <div>
-                        <strong>⏰ Statutory Deadline:</strong>{' '}
+                        <strong>{t('statutory_deadline_label', '⏰ Statutory Deadline:')}</strong>{' '}
                         <span style={{ color: validationResult.is_within_deadline ? '#16A34A' : '#DC2626', fontWeight: 600 }}>
                           {validationResult.deadline_status || 'Within 1-Year Limit'}
                         </span>
@@ -650,9 +654,9 @@ export default function WorkDetail() {
         {/* ─── Evidence Gallery (Before / Intermediate / Final) ──────────── */}
         <div className="card" style={{ marginBottom: 20 }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>📸 Verified Evidence Timeline & Site Photos</span>
+            <span>{t('verified_evidence_title', '📸 Verified Evidence Timeline & Site Photos')}</span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              {work.photos?.length || 2} Geotagged Records
+              {work.photos?.length || 2} {t('geotagged_records', 'Geotagged Records')}
             </span>
           </div>
 
@@ -666,11 +670,11 @@ export default function WorkDetail() {
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 <span style={{ position: 'absolute', top: 6, left: 6, background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4 }}>
-                  Milestone 0% Baseline
+                  {t('milestone_0_baseline', 'Milestone 0% Baseline')}
                 </span>
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 6 }}>
-                <div><strong>Excavation & Grading</strong></div>
+                <div><strong>{t('excavation_grading', 'Excavation & Grading')}</strong></div>
                 <div>📍 Centroid Lat: {work.lat?.toFixed(4)}, Lng: {work.lng?.toFixed(4)}</div>
               </div>
             </div>
@@ -685,12 +689,12 @@ export default function WorkDetail() {
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                   <span style={{ position: 'absolute', top: 6, left: 6, background: '#16A34A', color: '#fff', fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
-                    ✓ 100% Completed
+                    ✓ 100% {t('completed_tag', 'Completed')}
                   </span>
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 6 }}>
-                  <div><strong>Paved Concrete Handover</strong></div>
-                  <div>Authenticity Verified: 96.4% · EXIF Matched</div>
+                  <div><strong>{t('paved_concrete_handover', 'Paved Concrete Handover')}</strong></div>
+                  <div>{t('authenticity_verified', 'Authenticity Verified: 96.4% · EXIF Matched')}</div>
                 </div>
               </div>
             )}
@@ -711,15 +715,15 @@ export default function WorkDetail() {
         {/* ─── 5 AI Engine Breakdown ────────────────────────────────────── */}
         {rs?.engine_breakdown && (
           <div className="card" style={{ marginBottom: 20 }}>
-            <div className="card-header">⚙️ 5 AI Engine Anomaly Contributions</div>
+            <div className="card-header">⚙️ {t('five_engine_contributions', '5 AI Engine Anomaly Contributions')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginTop: 12 }}>
               {Object.entries(rs.engine_breakdown).map(([engine, score]) => {
                 const labels = {
-                  compliance: '📋 Compliance',
-                  financial_anomaly: '💰 Financial',
-                  duplicate_ghost: '👻 Duplicate',
-                  vendor_network: '🕸️ Vendor',
-                  predictive_delay: '⏰ Delay Risk',
+                  compliance: t('engine_compliance', '📋 Compliance'),
+                  financial_anomaly: t('engine_financial', '💰 Financial'),
+                  duplicate_ghost: t('engine_duplicate', '👻 Duplicate'),
+                  vendor_network: t('engine_vendor', '🕸️ Vendor'),
+                  predictive_delay: t('engine_delay', '⏰ Delay Risk'),
                 };
                 const maxes = { compliance: 40, financial_anomaly: 35, duplicate_ghost: 25, vendor_network: 15, predictive_delay: 10 };
                 const pct = (score / (maxes[engine] || 40)) * 100;
@@ -727,7 +731,7 @@ export default function WorkDetail() {
                   <div key={engine} style={{ textAlign: 'center', padding: '12px 8px', background: 'var(--surface-2)', borderRadius: 8 }}>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: 4 }}>{labels[engine] || engine}</div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 800, color: score > 15 ? '#DC2626' : 'var(--navy)' }}>{score?.toFixed(0)}</div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>/ {maxes[engine]} max</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>/ {maxes[engine]} {t('max_label', 'max')}</div>
                     <div className="progress-bar" style={{ marginTop: 8 }}>
                       <div className="progress-fill" style={{ width: `${Math.min(pct, 100)}%`, background: pct > 60 ? 'var(--red-risk)' : 'var(--navy)' }} />
                     </div>
@@ -741,7 +745,7 @@ export default function WorkDetail() {
         {/* ─── Admin Review Controls ────────────────────────────────────── */}
         {isAdmin && (
           <div className="card" style={{ marginBottom: 20, borderLeft: '4px solid var(--navy)' }}>
-            <div className="card-header">🏷️ Officer Verification & Feedback (§3.1)</div>
+            <div className="card-header">{t('officer_verification_title', '🏷️ Officer Verification & Feedback (§3.1)')}</div>
             {feedbackDone ? (
               <div style={{ color: 'var(--green-clean)', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <CheckCircle size={18} /> Feedback logged — recorded in OfficerFeedback audit trail
@@ -758,10 +762,10 @@ export default function WorkDetail() {
                 />
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button className="btn btn-danger" disabled={feedbackSubmitting} onClick={() => submitFeedback(true)}>
-                    <AlertTriangle size={14} /> Flag as Genuine Issue
+                    <AlertTriangle size={14} /> {t('flag_as_genuine', 'Flag as Genuine Issue')}
                   </button>
                   <button className="btn btn-success" disabled={feedbackSubmitting} onClick={() => submitFeedback(false)}>
-                    <CheckCircle size={14} /> Mark Verified / Resolved
+                    <CheckCircle size={14} /> {t('mark_resolved', 'Mark Verified / Resolved')}
                   </button>
                 </div>
               </>

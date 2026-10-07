@@ -5,19 +5,56 @@ import { useState, useRef } from 'react';
 import Layout from '../components/Layout';
 import { engines as enginesApi } from '../api/client';
 import { Play, RefreshCw } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function EngineControl() {
   const [jobId, setJobId] = useState(null);
   const [jobStatus, setJobStatus] = useState(null);
   const [running, setRunning] = useState(false);
   const pollRef = useRef();
+  const { t, lang } = useLanguage();
 
   const ENGINE_INFO = [
-    { name: 'Compliance Rule Engine', key: 'compliance', desc: 'SC/ST earmark, ineligible category, deadline breach, trust cap', weight: 40 },
-    { name: 'Financial Anomaly Engine', key: 'financial_anomaly', desc: 'IsolationForest + Benford\'s Law + just-under-threshold clustering', weight: 35 },
-    { name: 'Duplicate & Ghost Detector', key: 'duplicate_ghost', desc: 'sentence-transformers cosine similarity + imagehash phash', weight: 25 },
-    { name: 'Vendor Network Intelligence', key: 'vendor_network', desc: 'NetworkX + Louvain community detection for collusion rings', weight: 15 },
-    { name: 'Predictive Delay Engine', key: 'predictive_delay', desc: 'GradientBoostingClassifier — probability of missing deadline', weight: 10 },
+    {
+      name: 'Compliance Rule Engine',
+      nameHi: 'अनुपालन नियम इंजन',
+      key: 'compliance',
+      desc: 'SC/ST earmark, ineligible category, deadline breach, trust cap',
+      descHi: 'अनुसूचित जाति/जनजाति आवंटन, अपात्र श्रेणी, समय सीमा उल्लंघन, ट्रस्ट सीमा',
+      weight: 40
+    },
+    {
+      name: 'Financial Anomaly Engine',
+      nameHi: 'वित्तीय विसंगति इंजन',
+      key: 'financial_anomaly',
+      desc: "IsolationForest + Benford's Law + just-under-threshold clustering",
+      descHi: 'आइसोलेशनफॉरेस्ट + बेनफोर्ड का नियम + सीमा के ठीक नीचे क्लस्टरिंग',
+      weight: 35
+    },
+    {
+      name: 'Duplicate & Ghost Detector',
+      nameHi: 'डुप्लिकेट व फर्जी परियोजना डिटेक्टर',
+      key: 'duplicate_ghost',
+      desc: 'sentence-transformers cosine similarity + imagehash phash',
+      descHi: 'सेंटेंस-ट्रांसफॉर्मर्स कोसाइन समानता + इमेजहैश पीएचैश',
+      weight: 25
+    },
+    {
+      name: 'Vendor Network Intelligence',
+      nameHi: 'विक्रेता नेटवर्क विश्लेषण',
+      key: 'vendor_network',
+      desc: 'NetworkX + Louvain community detection for collusion rings',
+      descHi: 'नेटवर्कएक्स + ल्यूवेन कम्युनिटी डिटेक्शन (सांठगांठ सिंडिकेट हेतु)',
+      weight: 15
+    },
+    {
+      name: 'Predictive Delay Engine',
+      nameHi: 'पूर्वानुमानित विलंब इंजन',
+      key: 'predictive_delay',
+      desc: 'GradientBoostingClassifier — probability of missing deadline',
+      descHi: 'ग्रेडिएंटबूस्टिंग क्लासिफायर — समय सीमा चूकने की संभावना',
+      weight: 10
+    },
   ];
 
   async function runEngines() {
@@ -64,27 +101,29 @@ export default function EngineControl() {
           marginBottom: '10px'
         }}>
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--secondary)', display: 'inline-block' }} />
-          PRAHARI AI CORE HEURISTICS
+          {lang === 'hi' ? 'प्रहरी एआई कोर मूल्यांकन' : 'PRAHARI AI CORE HEURISTICS'}
         </div>
         <h1 style={{ margin: 0, fontSize: '1.65rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em' }}>
-          ⚙️ Engine Control Panel
+          ⚙️ {t('engine_control_panel', 'Engine Control Panel')}
         </h1>
         <p style={{ margin: '6px 0 0', color: 'rgba(229, 247, 255, 0.88)', fontSize: '0.875rem' }}>
-          Re-run all 5 AI fraud detection engines · View model performance · Audit scoring telemetry
+          {lang === 'hi'
+            ? 'सभी 5 एआई धोखाधड़ी जांच इंजनों को पुनः चलाएं · मॉडल प्रदर्शन देखें · ऑडिट स्कोरिंग विवरण'
+            : 'Re-run all 5 AI fraud detection engines · View model performance · Audit scoring telemetry'}
         </p>
       </div>
 
       {/* Run button */}
       <div className="card" style={{ marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <div style={{ fontWeight: 700, color: 'var(--navy)' }}>Re-run All Engines</div>
+            <div style={{ fontWeight: 700, color: 'var(--navy)' }}>{t('re_run_all_engines', 'Re-run All Engines')}</div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Scores up to 3,000 works across all 5 engines. Takes 2-5 minutes on first run (model training included).
+              {t('engine_desc', 'Scores up to 3,000 works across all 5 engines. Takes 2-5 minutes on first run (model training included).')}
             </div>
           </div>
           <button className="btn btn-primary" onClick={runEngines} disabled={running}>
-            {running ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Running...</> : <><Play size={14} /> Run Engines</>}
+            {running ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> {t('running_engines', 'Running...')}</> : <><Play size={14} /> {t('run_engines', 'Run Engines')}</>}
           </button>
         </div>
 
@@ -113,18 +152,24 @@ export default function EngineControl() {
         {ENGINE_INFO.map((e) => (
           <div key={e.key} className="card" style={{ borderLeft: `4px solid var(--navy)` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <div style={{ fontWeight: 700, color: 'var(--navy)', fontSize: '0.9rem' }}>{e.name}</div>
+              <div style={{ fontWeight: 700, color: 'var(--navy)', fontSize: '0.9rem' }}>
+                {lang === 'hi' ? e.nameHi : e.name}
+              </div>
               <div style={{ background: 'var(--surface-2)', padding: '2px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700 }}>
-                Max: {e.weight}pts
+                {lang === 'hi' ? 'अधिकतम' : 'Max'}: {e.weight}{lang === 'hi' ? ' अंक' : 'pts'}
               </div>
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{e.desc}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              {lang === 'hi' ? e.descHi : e.desc}
+            </div>
             <div style={{ marginTop: 12 }}>
               <div className="progress-bar">
                 <div className="progress-fill" style={{ width: `${(e.weight / 40) * 100}%`, background: 'var(--navy)' }} />
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                Weight: {e.weight} / 125 total points → normalized to 0-100
+                {lang === 'hi'
+                  ? `भार: ${e.weight} / 125 कुल अंक → 0-100 में सामान्यीकृत`
+                  : `Weight: ${e.weight} / 125 total points → normalized to 0-100`}
               </div>
             </div>
           </div>

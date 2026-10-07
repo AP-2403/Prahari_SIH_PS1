@@ -1,12 +1,10 @@
-/**
- * WorksList — searchable, filterable table of works (shared admin & user)
- */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import RiskBadge from '../components/RiskBadge';
 import { works as worksApi } from '../api/client';
 import { Search, Filter } from 'lucide-react';
+import { useLanguage, translateStatus, translateCategory } from '../context/LanguageContext';
 
 export default function WorksList() {
   const [worksList, setWorksList] = useState([]);
@@ -15,6 +13,7 @@ export default function WorksList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [minRisk, setMinRisk] = useState('');
   const navigate = useNavigate();
+  const { t, lang } = useLanguage();
   const userRaw = localStorage.getItem('prahari_user');
   const user = userRaw ? JSON.parse(userRaw) : {};
 
@@ -39,10 +38,10 @@ export default function WorksList() {
     <Layout>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: 'var(--navy)' }}>
-          📋 Works Database
+          📋 {t('works_database', 'Works Database')}
         </h1>
         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          {filtered.length} works shown
+          {filtered.length} {t('works_shown', 'works shown')}
         </div>
       </div>
 
@@ -50,18 +49,18 @@ export default function WorksList() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         <div style={{ flex: 1, position: 'relative' }}>
           <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input className="input" placeholder="Search works or constituency..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
+          <input className="input" placeholder={t('search_works', 'Search works or constituency...')} value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
         </div>
         <select className="input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ width: 160, padding: '10px 12px' }}>
-          <option value="">All Statuses</option>
-          <option value="Recommended">Recommended</option>
-          <option value="Completed">Completed</option>
+          <option value="">{t('all_statuses', 'All Statuses')}</option>
+          <option value="Recommended">{t('status_recommended', 'Recommended')}</option>
+          <option value="Completed">{t('status_completed', 'Completed')}</option>
         </select>
         <select className="input" value={minRisk} onChange={(e) => setMinRisk(e.target.value)} style={{ width: 160, padding: '10px 12px' }}>
-          <option value="">All Risk Levels</option>
-          <option value="70">High Risk (70+)</option>
-          <option value="40">Medium+ (40+)</option>
-          <option value="1">Any Scored</option>
+          <option value="">{t('all_risks', 'All Risk Levels')}</option>
+          <option value="70">{lang === 'hi' ? 'उच्च जोखिम (70+)' : 'High Risk (70+)'}</option>
+          <option value="40">{lang === 'hi' ? 'मध्यम+ (40+)' : 'Medium+ (40+)'}</option>
+          <option value="1">{lang === 'hi' ? 'कोई भी मूल्यांकित' : 'Any Scored'}</option>
         </select>
       </div>
 
@@ -71,13 +70,13 @@ export default function WorksList() {
           <table className="data-table">
             <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <tr>
-                <th>Work</th>
-                <th>Category</th>
-                <th>District</th>
-                <th>MP</th>
-                <th>Sanctioned</th>
-                <th>Status</th>
-                <th>Risk Score</th>
+                <th>{t('th_work', 'Work')}</th>
+                <th>{t('th_category', 'Category')}</th>
+                <th>{t('th_district', 'District')}</th>
+                <th>{lang === 'hi' ? 'सांसद प्रतिनिधि' : 'MP'}</th>
+                <th>{lang === 'hi' ? 'स्वीकृत राशि' : 'Sanctioned'}</th>
+                <th>{t('th_status', 'Status')}</th>
+                <th>{t('th_risk', 'Risk Score')}</th>
               </tr>
             </thead>
             <tbody>
@@ -86,7 +85,7 @@ export default function WorksList() {
                   <tr key={i}>{[...Array(7)].map((_, j) => <td key={j}><div className="skeleton" style={{ height: 16 }} /></td>)}</tr>
                 ))
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No works found</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{lang === 'hi' ? 'कोई कार्य नहीं मिला' : 'No works found'}</td></tr>
               ) : (
                 filtered.map((w) => (
                   <tr key={w.id} onClick={() => navigate(`${basePath}/works/${w.id}`)}>
@@ -94,13 +93,13 @@ export default function WorksList() {
                       <div style={{ fontWeight: 500 }}>{w.title?.slice(0, 55)}{w.title?.length > 55 ? '…' : ''}</div>
                       {w.work_id_source && <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{w.work_id_source}</div>}
                     </td>
-                    <td><span className="chip" style={{ background: 'var(--surface-2)', color: 'var(--navy)' }}>{w.category}</span></td>
+                    <td><span className="chip" style={{ background: 'var(--surface-2)', color: 'var(--navy)' }}>{translateCategory(w.category, lang)}</span></td>
                     <td style={{ fontSize: '0.8rem' }}>{w.constituency}</td>
                     <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{w.mp_name?.slice(0, 25)}</td>
-                    <td style={{ fontSize: '0.875rem', fontWeight: 500 }}>₹{((w.sanctioned_amount || 0) / 1e5).toFixed(1)}L</td>
+                    <td style={{ fontSize: '0.875rem', fontWeight: 500 }}>₹{((w.sanctioned_amount || 0) / 1e5).toFixed(1)}{lang === 'hi' ? ' लाख' : 'L'}</td>
                     <td>
                       <span style={{ fontSize: '0.75rem', color: w.status === 'Completed' ? 'var(--green-clean)' : 'var(--amber)', fontWeight: 600 }}>
-                        {w.status}
+                        {translateStatus(w.status, lang)}
                       </span>
                     </td>
                     <td><RiskBadge score={w.risk_score} /></td>

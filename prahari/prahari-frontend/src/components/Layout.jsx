@@ -47,8 +47,29 @@ export default function Layout({ children }) {
   }
 
   // Format breadcrumbs nicely
+  const breadcrumbMapHi = {
+    'admin': 'प्रशासक',
+    'user': 'उपयोगकर्ता',
+    'ministry': 'मंत्रालय',
+    'state': 'राज्य',
+    'district': 'ज़िला',
+    'works': 'कार्य',
+    'upload': 'डेटा अपलोड',
+    'review': 'समीक्षा',
+    'vendors': 'विक्रेता',
+    'engines': 'इंजन नियंत्रण',
+    'assistant': 'एआई सहायक',
+    'dashboard': 'डैशबोर्ड',
+    'alerts': 'चेतावनियां',
+    'citizen': 'नागरिक',
+  };
   const pathParts = location.pathname.split('/').filter(Boolean);
-  const breadcrumbText = pathParts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' › ');
+  const breadcrumbText = pathParts.map((p) => {
+    if (lang === 'hi' && breadcrumbMapHi[p.toLowerCase()]) {
+      return breadcrumbMapHi[p.toLowerCase()];
+    }
+    return p.charAt(0).toUpperCase() + p.slice(1);
+  }).join(' › ');
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--surface)' }}>

@@ -1,8 +1,11 @@
 """Engines endpoint — POST /api/engines/run (§11)."""
 import asyncio
 import json
+import os
+import tempfile
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
@@ -18,14 +21,26 @@ router = APIRouter(prefix="/api/engines", tags=["engines"])
 _jobs: dict[str, dict] = {}
 
 
+def _sync_job_to_disk(job_id: str):
+    if job_id in _jobs:
+        try:
+            job_file = Path(tempfile.gettempdir()) / f"prahari_job_{job_id}.json"
+            with open(job_file, "w") as f:
+                json.dump(_jobs[job_id], f)
+        except Exception:
+            pass
+
+
 def _append_log(job_id: str, msg: str):
     if job_id in _jobs:
         _jobs[job_id]["log"].append(f"[{datetime.utcnow().strftime('%H:%M:%S')}] {msg}")
+        _sync_job_to_disk(job_id)
 
 
 async def _run_engines_job(job_id: str, work_ids: list[int] | None = None):
     """Background task: run all engines on (subset of) works."""
     _jobs[job_id] = {"status": "running", "stage": "init", "progress": 0, "log": []}
+    _sync_job_to_disk(job_id)
     _append_log(job_id, "🚀 Engine run started")
 
     db = SessionLocal()
@@ -57,17 +72,21 @@ async def _run_engines_job(job_id: str, work_ids: list[int] | None = None):
         )
 
         # Score works (include both Recommended and Completed)
+        is_serverless = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
         if work_ids:
             works_to_score = db.query(Work).filter(Work.id.in_(work_ids)).all()
         else:
-            rec_works = db.query(Work).filter(Work.status == "Recommended").limit(1000).all()
-            comp_works = db.query(Work).filter(Work.status == "Completed").limit(500).all()
+            rec_limit = 50 if is_serverless else 1000
+            comp_limit = 50 if is_serverless else 500
+            rec_works = db.query(Work).filter(Work.status == "Recommended").limit(rec_limit).all()
+            comp_works = db.query(Work).filter(Work.status == "Completed").limit(comp_limit).all()
             works_to_score = rec_works + comp_works
 
         total = len(works_to_score)
         _jobs[job_id]["stage"] = "scoring"
         _append_log(job_id, f"⚙️  Scoring {total} works across 5 engines...")
 
+        step = 10 if is_serverless else 100
         for i, work in enumerate(works_to_score):
             try:
                 run_all_engines_for_work(
@@ -78,11 +97,12 @@ async def _run_engines_job(job_id: str, work_ids: list[int] | None = None):
             except Exception as e:
                 _append_log(job_id, f"⚠️  Work {work.id}: {str(e)[:60]}")
 
-            if i % 100 == 0:
-                pct = round(i / max(total, 1) * 100, 1)
+            if (i + 1) % step == 0 or i == total - 1:
+                pct = round((i + 1) / max(total, 1) * 100, 1)
                 _jobs[job_id]["progress"] = pct
-                _append_log(job_id, f"   ... {i}/{total} scored ({pct}%)")
+                _append_log(job_id, f"   ... {i + 1}/{total} scored ({pct}%)")
                 db.commit()
+                _sync_job_to_disk(job_id)
                 await asyncio.sleep(0)   # yield to event loop
 
         db.commit()
@@ -90,6 +110,7 @@ async def _run_engines_job(job_id: str, work_ids: list[int] | None = None):
         _jobs[job_id]["status"] = "done"
         _jobs[job_id]["progress"] = 100.0
         _append_log(job_id, f"🎉 Scoring complete — {total} works risk-scored!")
+        _sync_job_to_disk(job_id)
 
     except Exception as e:
         _jobs[job_id]["status"] = "error"
@@ -97,6 +118,7 @@ async def _run_engines_job(job_id: str, work_ids: list[int] | None = None):
         _append_log(job_id, f"❌ Error: {str(e)}")
         import traceback
         _append_log(job_id, traceback.format_exc()[:300])
+        _sync_job_to_disk(job_id)
     finally:
         db.close()
 
@@ -121,6 +143,15 @@ async def run_engines(
 def get_engine_status(job_id: str):
     job = _jobs.get(job_id)
     if not job:
+        job_file = Path(tempfile.gettempdir()) / f"prahari_job_{job_id}.json"
+        if job_file.exists():
+            try:
+                with open(job_file, "r") as f:
+                    job = json.load(f)
+                    _jobs[job_id] = job
+            except Exception:
+                pass
+    if not job:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Job not found")
     return JobStatusOut(
@@ -130,3 +161,4 @@ def get_engine_status(job_id: str):
         progress_pct=job.get("progress", 0),
         log=job.get("log", []),
     )
+

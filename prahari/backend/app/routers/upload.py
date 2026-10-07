@@ -22,10 +22,32 @@ from ..models import User
 
 router = APIRouter(tags=["upload"])
 
-UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads"
-UPLOAD_DIR.mkdir(exist_ok=True)
+IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+
+def _get_upload_dir() -> Path:
+    import tempfile
+    base_uploads = Path(__file__).parent.parent.parent / "uploads"
+    if IS_VERCEL:
+        tmp_uploads = Path(tempfile.gettempdir()) / "prahari_uploads"
+        tmp_uploads.mkdir(parents=True, exist_ok=True)
+        return tmp_uploads
+    try:
+        base_uploads.mkdir(parents=True, exist_ok=True)
+        test_file = base_uploads / f".test_perm_{os.getpid()}"
+        test_file.touch()
+        test_file.unlink()
+        return base_uploads
+    except Exception:
+        tmp_uploads = Path(tempfile.gettempdir()) / "prahari_uploads"
+        tmp_uploads.mkdir(parents=True, exist_ok=True)
+        return tmp_uploads
+
+
+UPLOAD_DIR = _get_upload_dir()
 
 # In-memory upload job store
+
 _upload_jobs: dict[str, dict] = {}
 _upload_previews: dict[str, dict] = {}
 
@@ -243,8 +265,12 @@ async def upload_progress_photo(
     filename = f"progress_{work_id}_{uuid.uuid4().hex[:8]}{ext}"
     save_path = UPLOAD_DIR / filename
     content = await file.read()
-    async with aiofiles.open(save_path, "wb") as f:
-        await f.write(content)
+    try:
+        async with aiofiles.open(save_path, "wb") as f:
+            await f.write(content)
+    except Exception as e:
+        print(f"[upload] Notice: file save to disk encountered error ({save_path}): {e}")
+
 
     # Extract EXIF
     gps_lat = override_gps_lat
@@ -332,8 +358,16 @@ async def upload_progress_photo(
             import numpy as np
             from skimage.metrics import structural_similarity as ssim
             prev_path = previous_photo.file_path
-            if prev_path and os.path.exists(prev_path):
-                img1 = cv2.imread(prev_path, cv2.IMREAD_GRAYSCALE)
+            check_path = None
+            if prev_path:
+                if os.path.exists(prev_path):
+                    check_path = prev_path
+                else:
+                    alt_path = UPLOAD_DIR / Path(prev_path).name
+                    if alt_path.exists():
+                        check_path = str(alt_path)
+            if check_path:
+                img1 = cv2.imread(check_path, cv2.IMREAD_GRAYSCALE)
                 img2 = cv2.imdecode(np.frombuffer(content, np.uint8), cv2.IMREAD_GRAYSCALE)
                 if img1 is not None and img2 is not None:
                     h, w = min(img1.shape[0], img2.shape[0]), min(img1.shape[1], img2.shape[1])
@@ -397,7 +431,7 @@ async def upload_progress_photo(
     # Store the new photo
     new_photo = Photo(
         work_id=work_id,
-        file_path=str(save_path),
+        file_path=f"/uploads/{filename}",
         gps_lat=gps_lat,
         gps_lng=gps_lng,
         timestamp=timestamp,

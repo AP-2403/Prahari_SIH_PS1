@@ -25,9 +25,8 @@ app.add_middleware(
 )
 
 # Mount uploaded files as static (for photo display)
-UPLOADS_DIR = Path(__file__).parent.parent / "uploads"
-UPLOADS_DIR.mkdir(exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+from .routers.upload import UPLOAD_DIR
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 # Include routers
 from .routers.auth import router as auth_router
@@ -56,6 +55,19 @@ app.include_router(risk_router)
 @app.on_event("startup")
 async def startup():
     """Create tables and seed the database on first run."""
+    # Ensure sample assets from bundled uploads directory are copied to UPLOAD_DIR
+    bundled_uploads = Path(__file__).parent.parent / "uploads"
+    if bundled_uploads.exists() and UPLOAD_DIR != bundled_uploads:
+        import shutil
+        for item in bundled_uploads.glob("*"):
+            if item.is_file():
+                dest = UPLOAD_DIR / item.name
+                if not dest.exists():
+                    try:
+                        shutil.copyfile(item, dest)
+                    except Exception:
+                        pass
+
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
@@ -69,6 +81,7 @@ async def startup():
         traceback.print_exc()
     finally:
         db.close()
+
 
 
 @app.get("/health")

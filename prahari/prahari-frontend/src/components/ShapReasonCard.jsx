@@ -1,12 +1,13 @@
-/**
- * ShapReasonCard — displays §7.6 SHAP explanations for a work
- */
+import { useLanguage } from '../context/LanguageContext';
+
 export default function ShapReasonCard({ reasons = [], confidenceBreakdown = {}, guidelineClause }) {
+  const { t } = useLanguage();
+
   if (!reasons.length && !Object.keys(confidenceBreakdown).length) {
     return (
       <div className="card" style={{ borderLeft: '4px solid #E2E8F0' }}>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-          No risk factors detected — engines have not run yet or this work is clean.
+          {t('no_risk_factors', 'No risk factors detected — engines have not run yet or this work is clean.')}
         </p>
       </div>
     );
@@ -15,7 +16,7 @@ export default function ShapReasonCard({ reasons = [], confidenceBreakdown = {},
   return (
     <div className="card" style={{ borderLeft: '4px solid var(--amber)' }}>
       <div className="card-header" style={{ color: 'var(--amber)', marginBottom: '12px' }}>
-        🔍 Why This Work Was Flagged
+        🔍 {t('why_flagged_title', 'Why This Work Was Flagged')}
       </div>
 
       {guidelineClause && (
@@ -32,7 +33,7 @@ export default function ShapReasonCard({ reasons = [], confidenceBreakdown = {},
       {reasons.length > 0 && (
         <div style={{ marginBottom: '16px' }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>
-            AI Explanation
+            {t('ai_explanation', 'AI Explanation')}
           </div>
           {reasons.map((r, i) => (
             <div key={i} style={{
@@ -54,8 +55,9 @@ export default function ShapReasonCard({ reasons = [], confidenceBreakdown = {},
       {Object.keys(confidenceBreakdown).length > 0 && (
         <div>
           <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>
-            Detection Confidence Breakdown
+            {t('detection_breakdown', 'Detection Confidence Breakdown')}
           </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {Object.values(confidenceBreakdown)
               .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))
