@@ -6,6 +6,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load local environment variables from prahari/backend/.env or root .env
+load_dotenv(Path(__file__).parent.parent / ".env")
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
+load_dotenv()
 
 from .database import engine, SessionLocal, Base
 from . import models  # ensure models are imported before create_all

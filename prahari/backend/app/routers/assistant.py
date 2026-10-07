@@ -8,6 +8,11 @@ import json
 import urllib.request
 import urllib.error
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
+load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
+load_dotenv()
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
